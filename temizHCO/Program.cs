@@ -16,7 +16,7 @@ namespace temizHCO
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Kayıtlar());
+            Application.Run(new Form1());
         }
     }
 }
