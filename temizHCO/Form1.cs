@@ -122,5 +122,11 @@ namespace temizHCO
             AşıForm a = new AşıForm();
             a.Show();
         }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            Görüntüleme g = new Görüntüleme();
+            g.Show();
+        }
     }
 }
