@@ -108,7 +108,7 @@ namespace temizHCO
         private void button1_Click_1(object sender, EventArgs e)
         {
             HastaSahibiForm hsb = new HastaSahibiForm();
-            hsb.Show();
+            hsb.Show(); 
         }
 
         private void button2_Click_1(object sender, EventArgs e)
@@ -127,6 +127,11 @@ namespace temizHCO
         {
             Görüntüleme g = new Görüntüleme();
             g.Show();
+        }
+
+        private void Form1_Load_1(object sender, EventArgs e)
+        {
+
         }
     }
 }

@@ -41,6 +41,7 @@
             this.label4 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.button4 = new System.Windows.Forms.Button();
+            this.dateTimePicker1 = new System.Windows.Forms.DateTimePicker();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             this.panel3.SuspendLayout();
@@ -49,7 +50,7 @@
             // button1
             // 
             this.button1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-            this.button1.Location = new System.Drawing.Point(12, 12);
+            this.button1.Location = new System.Drawing.Point(12, 54);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(177, 96);
             this.button1.TabIndex = 0;
@@ -60,7 +61,7 @@
             // button2
             // 
             this.button2.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-            this.button2.Location = new System.Drawing.Point(264, 12);
+            this.button2.Location = new System.Drawing.Point(264, 54);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(177, 96);
             this.button2.TabIndex = 1;
@@ -71,7 +72,7 @@
             // button3
             // 
             this.button3.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-            this.button3.Location = new System.Drawing.Point(516, 12);
+            this.button3.Location = new System.Drawing.Point(516, 54);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(177, 96);
             this.button3.TabIndex = 2;
@@ -84,7 +85,7 @@
             this.panel1.BackColor = System.Drawing.Color.Orange;
             this.panel1.Controls.Add(this.label6);
             this.panel1.Controls.Add(this.label3);
-            this.panel1.Location = new System.Drawing.Point(516, 118);
+            this.panel1.Location = new System.Drawing.Point(516, 160);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(181, 118);
             this.panel1.TabIndex = 3;
@@ -116,7 +117,7 @@
             this.panel2.BackColor = System.Drawing.SystemColors.ControlDark;
             this.panel2.Controls.Add(this.label5);
             this.panel2.Controls.Add(this.label2);
-            this.panel2.Location = new System.Drawing.Point(262, 118);
+            this.panel2.Location = new System.Drawing.Point(262, 160);
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(181, 118);
             this.panel2.TabIndex = 4;
@@ -148,7 +149,7 @@
             this.panel3.BackColor = System.Drawing.SystemColors.ActiveCaption;
             this.panel3.Controls.Add(this.label4);
             this.panel3.Controls.Add(this.label1);
-            this.panel3.Location = new System.Drawing.Point(8, 118);
+            this.panel3.Location = new System.Drawing.Point(8, 160);
             this.panel3.Name = "panel3";
             this.panel3.Size = new System.Drawing.Size(181, 118);
             this.panel3.TabIndex = 4;
@@ -178,7 +179,7 @@
             // button4
             // 
             this.button4.Font = new System.Drawing.Font("Microsoft Sans Serif", 19.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-            this.button4.Location = new System.Drawing.Point(129, 275);
+            this.button4.Location = new System.Drawing.Point(129, 317);
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(468, 43);
             this.button4.TabIndex = 5;
@@ -186,11 +187,20 @@
             this.button4.UseVisualStyleBackColor = true;
             this.button4.Click += new System.EventHandler(this.button4_Click);
             // 
+            // dateTimePicker1
+            // 
+            this.dateTimePicker1.Font = new System.Drawing.Font("Microsoft Sans Serif", 16.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.dateTimePicker1.Location = new System.Drawing.Point(298, 12);
+            this.dateTimePicker1.Name = "dateTimePicker1";
+            this.dateTimePicker1.Size = new System.Drawing.Size(395, 38);
+            this.dateTimePicker1.TabIndex = 6;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(706, 330);
+            this.ClientSize = new System.Drawing.Size(706, 361);
+            this.Controls.Add(this.dateTimePicker1);
             this.Controls.Add(this.button4);
             this.Controls.Add(this.panel3);
             this.Controls.Add(this.panel2);
@@ -201,6 +211,7 @@
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Form1";
+            this.Load += new System.EventHandler(this.Form1_Load_1);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
             this.panel2.ResumeLayout(false);
@@ -226,6 +237,7 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button button4;
+        private System.Windows.Forms.DateTimePicker dateTimePicker1;
     }
 }
 
