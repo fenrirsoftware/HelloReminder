@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Data.SqlClient;
 using System.Drawing;
 using System.Linq;
 using System.Reflection;
@@ -40,60 +41,115 @@ namespace temizHCO
             if (radioButton1.Checked)
             {
                 string belirliHayvanAdi = textBox1.Text.Trim(); // TextBox'tan alınan değeri kullanın
-                string query = "SELECT Hayvanlar.Ad AS HayvanAdi, HastaSahipleri.Ad AS SahipAdi, HastaSahipleri.Soyad AS SahipSoyadi, " +
-                               "HastaSahipleri.TCKimlik, HastaSahipleri.TelefonNumarasi, " +
-                               "Asilar.AsiAdi, Asilar.AsiTarihi, Asilar.AsiTekrarTarihi " +
-                               "FROM Hayvanlar " +
-                               "INNER JOIN HayvanHastaSahipleri ON Hayvanlar.HayvanID = HayvanHastaSahipleri.HayvanID " +
-                               "INNER JOIN HastaSahipleri ON HayvanHastaSahipleri.SahipID = HastaSahipleri.SahipID " +
-                               "LEFT JOIN HayvanAsi ON Hayvanlar.HayvanID = HayvanAsi.HayvanID " +
-                               "LEFT JOIN Asilar ON HayvanAsi.AsiTakipID = Asilar.AsiTakipID " +
-                               $"WHERE Hayvanlar.Ad LIKE '%{belirliHayvanAdi}%'"; // LIKE kullanıldı
+                string query = $"SELECT Hayvanlar.HayvanID FROM Hayvanlar WHERE Hayvanlar.Ad LIKE '%{belirliHayvanAdi}%'";
+
+
 
                 ExecuteQueryAndShowResult(query);
             }
             else if (radioButton2.Checked)
             {
-                string tcKimlik = textBox1.Text.Trim(); // TextBox'tan alınan TC Kimlik değerini kullanın
-                string query = "SELECT Hayvanlar.Ad AS HayvanAdi, HastaSahipleri.Ad AS SahipAdi, HastaSahipleri.Soyad AS SahipSoyadi, " +
-                               "HastaSahipleri.TCKimlik, HastaSahipleri.TelefonNumarasi, " +
-                               "Asilar.AsiAdi, Asilar.AsiTarihi, Asilar.AsiTekrarTarihi " +
+                string tcKimlik = textBox1.Text.Trim();
+                string query = "SELECT Hayvanlar.HayvanID, Hayvanlar.Ad AS HayvanAdi " +
                                "FROM HastaSahipleri " +
                                "INNER JOIN HayvanHastaSahipleri ON HastaSahipleri.SahipID = HayvanHastaSahipleri.SahipID " +
                                "INNER JOIN Hayvanlar ON HayvanHastaSahipleri.HayvanID = Hayvanlar.HayvanID " +
-                               "LEFT JOIN HayvanAsi ON Hayvanlar.HayvanID = HayvanAsi.HayvanID " +
-                               "LEFT JOIN Asilar ON HayvanAsi.AsiTakipID = Asilar.AsiTakipID " +
-                               $"WHERE HastaSahipleri.TCKimlik = '{tcKimlik}'"; // TC Kimlik ile sorgu
+                               $"WHERE HastaSahipleri.TCKimlik = '{tcKimlik}'";
 
-                ExecuteQueryAndShowResult(query);
+                List<int> hayvanIDList = new List<int>();
+                List<string> hayvanAdList = new List<string>(); // Hayvan adlarını saklamak için yeni bir liste ekledik
+
+                using (SqliteConnection sqliteConnection = new SqliteConnection(connectionString))
+                {
+                    sqliteConnection.Open();
+                    SqliteCommand command = new SqliteCommand(query, sqliteConnection);
+                    SqliteDataReader reader = command.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        int hayvanID = Convert.ToInt32(reader["HayvanID"]);
+                        hayvanIDList.Add(hayvanID);
+
+                        string hayvanAdi = reader["HayvanAdi"].ToString();
+                        hayvanAdList.Add(hayvanAdi); // Hayvan adını listeye ekledik
+
+                        // MessageBox.Show($"Hayvan Adı: {hayvanAdi}", "Sonuçlar"); // Bu satırı kaldırdık
+                    }
+
+                    reader.Close();
+                }
+
+                int secilenHayvanID = -1;
+                if (hayvanIDList.Count > 1)
+                {
+                    Form secimForm = new Form();
+                    secimForm.StartPosition = FormStartPosition.CenterScreen;
+                    secimForm.Text = "Hayvan Seçimi";
+                    secimForm.Size = new System.Drawing.Size(300, 150);
+
+                    Label label = new Label();
+                    label.Text = "Lütfen bir hayvan seçin (Hayvan Adı):"; // Kullanıcının görmesi için metni değiştirdik
+                    label.Location = new System.Drawing.Point(10, 10);
+                    secimForm.Controls.Add(label);
+
+                    ComboBox comboBox = new ComboBox();
+                    comboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+                    comboBox.Location = new System.Drawing.Point(10, 40);
+                    foreach (string ad in hayvanAdList)
+                    {
+                        comboBox.Items.Add(ad); // Hayvan adını kullanıcıya gösteriyoruz
+                    }
+                    secimForm.Controls.Add(comboBox);
+
+                    Button button = new Button();
+                    button.Text = "Seç";
+                    button.Location = new System.Drawing.Point(10, 70);
+                    button.Click += (s, ev) =>
+                    {
+                        if (comboBox.SelectedItem != null)
+                        {
+                            // Kullanıcının seçtiği hayvan adını kullanarak hayvan ID'sini alıyoruz
+                            secilenHayvanID = hayvanIDList[hayvanAdList.IndexOf(comboBox.SelectedItem.ToString())];
+                            secimForm.Close();
+                        }
+                        else
+                        {
+                            MessageBox.Show("Geçersiz Hayvan Seçimi. Lütfen geçerli bir seçenek seçin.");
+                        }
+                    };
+                    secimForm.Controls.Add(button);
+
+                    secimForm.ShowDialog();
+                }
+                else if (hayvanIDList.Count == 1)
+                {
+                    secilenHayvanID = hayvanIDList[0];
+                }
+                else
+                {
+                    MessageBox.Show("Sonuç bulunamadı.", "Sonuç Yok");
+                }
+
+                if (secilenHayvanID != -1)
+                {
+                    MessageBox.Show($"Seçilen Hayvan ID: {secilenHayvanID}", "Seçilen Hayvan");
+                }
             }
+
+
             else if (radioButton3.Checked)
             {
-                string pasaportNumarasi = textBox1.Text.Trim(); // TextBox'tan alınan pasaport numarasını kullanın
-                string query = "SELECT Hayvanlar.Ad AS HayvanAdi, HastaSahipleri.Ad AS SahipAdi, HastaSahipleri.Soyad AS SahipSoyadi, " +
-                               "HastaSahipleri.TCKimlik, HastaSahipleri.TelefonNumarasi, " +
-                               "Asilar.AsiAdi, Asilar.AsiTarihi, Asilar.AsiTekrarTarihi " +
-                               "FROM Hayvanlar " +
-                               "INNER JOIN HayvanHastaSahipleri ON Hayvanlar.HayvanID = HayvanHastaSahipleri.HayvanID " +
-                               "INNER JOIN HastaSahipleri ON HayvanHastaSahipleri.SahipID = HastaSahipleri.SahipID " +
-                               "LEFT JOIN HayvanAsi ON Hayvanlar.HayvanID = HayvanAsi.HayvanID " +
-                               "LEFT JOIN Asilar ON HayvanAsi.AsiTakipID = Asilar.AsiTakipID " +
-                               $"WHERE Hayvanlar.PasaportNumarasi = '{pasaportNumarasi}'"; // Pasaport numarası ile sorgu
+                string pasaportNumarasi = textBox1.Text.Trim();
+                string query = $"SELECT Hayvanlar.HayvanID FROM Hayvanlar WHERE Hayvanlar.PasaportNumarasi = '{pasaportNumarasi}'";
+
 
                 ExecuteQueryAndShowResult(query);
             }
             else if (radioButton4.Checked)
             {
-                string cipNumarasi = textBox1.Text.Trim(); // TextBox'tan alınan çip numarasını kullanın
-                string query = "SELECT Hayvanlar.Ad AS HayvanAdi, HastaSahipleri.Ad AS SahipAdi, HastaSahipleri.Soyad AS SahipSoyadi, " +
-                               "HastaSahipleri.TCKimlik, HastaSahipleri.TelefonNumarasi, " +
-                               "Asilar.AsiAdi, Asilar.AsiTarihi, Asilar.AsiTekrarTarihi " +
-                               "FROM Hayvanlar " +
-                               "INNER JOIN HayvanHastaSahipleri ON Hayvanlar.HayvanID = HayvanHastaSahipleri.HayvanID " +
-                               "INNER JOIN HastaSahipleri ON HayvanHastaSahipleri.SahipID = HastaSahipleri.SahipID " +
-                               "LEFT JOIN HayvanAsi ON Hayvanlar.HayvanID = HayvanAsi.HayvanID " +
-                               "LEFT JOIN Asilar ON HayvanAsi.AsiTakipID = Asilar.AsiTakipID " +
-                               $"WHERE Hayvanlar.CipNumarasi = '{cipNumarasi}'"; // Çip numarası ile sorgu
+                string cipNumarasi = textBox1.Text.Trim();
+                string query = $"SELECT Hayvanlar.HayvanID FROM Hayvanlar WHERE Hayvanlar.CipNumarasi = '{cipNumarasi}'";
+
 
                 ExecuteQueryAndShowResult(query);
             }
@@ -101,23 +157,114 @@ namespace temizHCO
 
             else if (radioButton5.Checked)
             {
-               
-                    string adsoyad = textBox1.Text.Trim();
-                  
-                    string query = $"SELECT Hayvanlar.Ad AS HayvanAdi, HastaSahipleri.Ad AS SahipAdi, HastaSahipleri.Soyad AS SahipSoyadi, " +
-                            "HastaSahipleri.TCKimlik, HastaSahipleri.TelefonNumarasi, " +
-                            "Asilar.AsiAdi, Asilar.AsiTarihi, Asilar.AsiTekrarTarihi " +
-                            "FROM Hayvanlar " +
-                            "INNER JOIN HayvanHastaSahipleri ON Hayvanlar.HayvanID = HayvanHastaSahipleri.HayvanID " +
-                            "INNER JOIN HastaSahipleri ON HayvanHastaSahipleri.SahipID = HastaSahipleri.SahipID " +
-                            "LEFT JOIN HayvanAsi ON Hayvanlar.HayvanID = HayvanAsi.HayvanID " +
-                            "LEFT JOIN Asilar ON HayvanAsi.AsiTakipID = Asilar.AsiTakipID " +
-                            $"WHERE HastaSahipleri.Ad LIKE '%{adsoyad}%' OR HastaSahipleri.Soyad LIKE '%{adsoyad}%' " +
-                            $"OR (HastaSahipleri.Ad || ' ' || HastaSahipleri.Soyad) LIKE '%{adsoyad}%'"; // LIKE kullanıldı
-                
+                string adsoyad = textBox1.Text.Trim();
+                string query = $"SELECT Hayvanlar.HayvanID, Hayvanlar.Ad AS HayvanAdi, HastaSahipleri.Ad AS SahipAdi, HastaSahipleri.Soyad AS SahipSoyadi, " +
+                               "HastaSahipleri.TCKimlik, HastaSahipleri.TelefonNumarasi, " +
+                               "Asilar.AsiAdi, Asilar.AsiTarihi, Asilar.AsiTekrarTarihi " +
+                               "FROM Hayvanlar " +
+                               "INNER JOIN HayvanHastaSahipleri ON Hayvanlar.HayvanID = HayvanHastaSahipleri.HayvanID " +
+                               "INNER JOIN HastaSahipleri ON HayvanHastaSahipleri.SahipID = HastaSahipleri.SahipID " +
+                               "LEFT JOIN HayvanAsi ON Hayvanlar.HayvanID = HayvanAsi.HayvanID " +
+                               "LEFT JOIN Asilar ON HayvanAsi.AsiTakipID = Asilar.AsiTakipID " +
+                               $"WHERE HastaSahipleri.Ad LIKE '%{adsoyad}%' OR HastaSahipleri.Soyad LIKE '%{adsoyad}%' " +
+                               $"OR (HastaSahipleri.Ad || ' ' || HastaSahipleri.Soyad) LIKE '%{adsoyad}%'"; // LIKE kullanıldı
 
-                ExecuteQueryAndShowResult(query);
+                List<int> hayvanIDList = new List<int>();
+                List<string> hayvanAdList = new List<string>(); // Hayvan adlarını saklamak için yeni bir liste ekledik
+
+                using (SqliteConnection sqliteConnection = new SqliteConnection(connectionString))
+                {
+                    sqliteConnection.Open();
+                    SqliteCommand command = new SqliteCommand(query, sqliteConnection);
+                    SqliteDataReader reader = command.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        int hayvanID = Convert.ToInt32(reader["HayvanID"]);
+                        hayvanIDList.Add(hayvanID);
+
+                        string hayvanAdi = reader["HayvanAdi"].ToString();
+                        hayvanAdList.Add(hayvanAdi); // Hayvan adını listeye ekledik
+
+                        // MessageBox.Show($"Hayvan Adı: {hayvanAdi}", "Sonuçlar"); // Bu satırı kaldırdık
+                    }
+
+                    reader.Close();
+                }
+
+                int secilenHayvanID = -1;
+                if (hayvanIDList.Count > 1)
+                {
+                    Form secimForm = new Form();
+                    secimForm.Text = "Hayvan Seçimi";
+                    secimForm.StartPosition = FormStartPosition.CenterScreen;
+                    secimForm.Size = new System.Drawing.Size(300, 150); // Boyutu düşürdük
+
+                    Label label = new Label();
+                    label.Text = "Lütfen bir hayvan seçin:";
+                    label.Location = new System.Drawing.Point(10, 10);
+                    secimForm.Controls.Add(label);
+
+                    ComboBox comboBox = new ComboBox();
+                    comboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+                    comboBox.Location = new System.Drawing.Point(10, 40);
+                    foreach (string ad in hayvanAdList)
+                    {
+                        comboBox.Items.Add(ad);
+                    }
+                    secimForm.Controls.Add(comboBox);
+
+                    Button button = new Button();
+                    button.Text = "Seç";
+                    button.Location = new System.Drawing.Point(10, 70);
+                    button.Click += (s, ev) =>
+                    {
+                        if (comboBox.SelectedItem != null)
+                        {
+                            secilenHayvanID = hayvanIDList[hayvanAdList.IndexOf(comboBox.SelectedItem.ToString())];
+                            secimForm.Close();
+                        }
+                        else
+                        {
+                            MessageBox.Show("Geçersiz Hayvan Seçimi. Lütfen geçerli bir seçenek seçin.");
+                        }
+                    };
+                    secimForm.Controls.Add(button);
+
+                    secimForm.ShowDialog();
+
+                    {
+                        if (comboBox.SelectedItem != null)
+                        {
+                            // Kullanıcının seçtiği hayvan adını kullanarak hayvanın ID'sini alıyoruz
+                            secilenHayvanID = hayvanIDList[hayvanAdList.IndexOf(comboBox.SelectedItem.ToString())];
+                            secimForm.Close();
+                        }
+                        else
+                        {
+                            MessageBox.Show("Geçersiz Hayvan Seçimi. Lütfen geçerli bir seçenek seçin.");
+                        }
+                    };
+                    secimForm.Controls.Add(button);
+
+                
+                }
+                else if (hayvanIDList.Count == 1)
+                {
+                    secilenHayvanID = hayvanIDList[0];
+                }
+                else
+                {
+                    MessageBox.Show("Sonuç bulunamadı.", "Sonuç Yok");
+                }
+
+                if (secilenHayvanID != -1)
+                {
+                    MessageBox.Show($"Seçilen Hayvan ID: {secilenHayvanID}", "Seçilen Hayvan");
+                }
             }
+        
+
             else
             {
                 MessageBox.Show("Lütfen bir seçim yapınız.");
@@ -137,25 +284,13 @@ namespace temizHCO
 
                 while (reader.Read())
                 {
-                    string hayvanAdi = reader["HayvanAdi"].ToString();
-                    string sahipAdi = reader["SahipAdi"].ToString();
-                    string sahipSoyadi = reader["SahipSoyadi"].ToString();
-                    string tcKimlik = reader["TCKimlik"].ToString();
-                    string telefonNumarasi = reader["TelefonNumarasi"].ToString();
-                    string asiAdi = reader["AsiAdi"].ToString();
-                    string asiTarihi = reader["AsiTarihi"].ToString();
-                    string asiTekrarTarihi = reader["AsiTekrarTarihi"].ToString();
+                    string hayvanAdi = reader["hayvanID"].ToString();
+      
 
                     sonuc += "Hayvan Adı: " + hayvanAdi + "\n";
-                    sonuc += "Sahip Adı: " + sahipAdi + "\n";
-                    sonuc += "Sahip Soyadı: " + sahipSoyadi + "\n";
-                    sonuc += "TC Kimlik: " + tcKimlik + "\n";
-                    sonuc += "Telefon Numarası: " + telefonNumarasi + "\n";
-                    sonuc += "Aşı Adı: " + asiAdi + "\n";
-                    sonuc += "Aşı Tarihi: " + asiTarihi + "\n";
-                    sonuc += "Aşı Tekrar Tarihi: " + asiTekrarTarihi + "\n\n";
+    
                 }
-
+                
                 reader.Close();
 
                 if (!string.IsNullOrEmpty(sonuc))
