@@ -38,8 +38,6 @@
             this.txtsahipad = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.label10 = new System.Windows.Forms.Label();
-            this.comboBox1 = new System.Windows.Forms.ComboBox();
             this.label9 = new System.Windows.Forms.Label();
             this.txtnot = new System.Windows.Forms.TextBox();
             this.txtür = new System.Windows.Forms.TextBox();
@@ -56,8 +54,6 @@
             this.label12 = new System.Windows.Forms.Label();
             this.txtpass = new System.Windows.Forms.TextBox();
             this.label13 = new System.Windows.Forms.Label();
-            this.txtad = new System.Windows.Forms.TextBox();
-            this.label14 = new System.Windows.Forms.Label();
             this.button2 = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -149,8 +145,6 @@
             // 
             // groupBox2
             // 
-            this.groupBox2.Controls.Add(this.label10);
-            this.groupBox2.Controls.Add(this.comboBox1);
             this.groupBox2.Controls.Add(this.label9);
             this.groupBox2.Controls.Add(this.txtnot);
             this.groupBox2.Controls.Add(this.txtür);
@@ -167,39 +161,20 @@
             this.groupBox2.Controls.Add(this.label12);
             this.groupBox2.Controls.Add(this.txtpass);
             this.groupBox2.Controls.Add(this.label13);
-            this.groupBox2.Controls.Add(this.txtad);
-            this.groupBox2.Controls.Add(this.label14);
             this.groupBox2.Font = new System.Drawing.Font("Microsoft Sans Serif", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
             this.groupBox2.Location = new System.Drawing.Point(384, 14);
             this.groupBox2.Margin = new System.Windows.Forms.Padding(5);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Padding = new System.Windows.Forms.Padding(5);
-            this.groupBox2.Size = new System.Drawing.Size(390, 502);
+            this.groupBox2.Size = new System.Drawing.Size(390, 386);
             this.groupBox2.TabIndex = 13;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Hasta Bilgi Formu";
             // 
-            // label10
-            // 
-            this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(7, 437);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(87, 29);
-            this.label10.TabIndex = 28;
-            this.label10.Text = "Sahibi:";
-            // 
-            // comboBox1
-            // 
-            this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Location = new System.Drawing.Point(173, 437);
-            this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(212, 37);
-            this.comboBox1.TabIndex = 27;
-            // 
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(7, 380);
+            this.label9.Location = new System.Drawing.Point(8, 331);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(84, 29);
             this.label9.TabIndex = 26;
@@ -207,7 +182,7 @@
             // 
             // txtnot
             // 
-            this.txtnot.Location = new System.Drawing.Point(172, 372);
+            this.txtnot.Location = new System.Drawing.Point(173, 323);
             this.txtnot.Multiline = true;
             this.txtnot.Name = "txtnot";
             this.txtnot.Size = new System.Drawing.Size(212, 58);
@@ -215,7 +190,7 @@
             // 
             // txtür
             // 
-            this.txtür.Location = new System.Drawing.Point(173, 331);
+            this.txtür.Location = new System.Drawing.Point(174, 282);
             this.txtür.Name = "txtür";
             this.txtür.Size = new System.Drawing.Size(212, 34);
             this.txtür.TabIndex = 19;
@@ -223,7 +198,7 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(7, 296);
+            this.label5.Location = new System.Drawing.Point(8, 247);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(104, 29);
             this.label5.TabIndex = 22;
@@ -231,7 +206,7 @@
             // 
             // txtcins
             // 
-            this.txtcins.Location = new System.Drawing.Point(173, 290);
+            this.txtcins.Location = new System.Drawing.Point(174, 241);
             this.txtcins.Name = "txtcins";
             this.txtcins.Size = new System.Drawing.Size(212, 34);
             this.txtcins.TabIndex = 18;
@@ -239,7 +214,7 @@
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(7, 254);
+            this.label6.Location = new System.Drawing.Point(8, 205);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(60, 29);
             this.label6.TabIndex = 21;
@@ -247,7 +222,7 @@
             // 
             // txtyas
             // 
-            this.txtyas.Location = new System.Drawing.Point(173, 249);
+            this.txtyas.Location = new System.Drawing.Point(174, 200);
             this.txtyas.Name = "txtyas";
             this.txtyas.Size = new System.Drawing.Size(212, 34);
             this.txtyas.TabIndex = 17;
@@ -255,7 +230,7 @@
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(7, 338);
+            this.label7.Location = new System.Drawing.Point(8, 289);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(56, 29);
             this.label7.TabIndex = 23;
@@ -263,7 +238,7 @@
             // 
             // textırk
             // 
-            this.textırk.Location = new System.Drawing.Point(173, 208);
+            this.textırk.Location = new System.Drawing.Point(174, 159);
             this.textırk.Name = "textırk";
             this.textırk.Size = new System.Drawing.Size(212, 34);
             this.textırk.TabIndex = 16;
@@ -271,7 +246,7 @@
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(7, 212);
+            this.label8.Location = new System.Drawing.Point(8, 163);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(45, 29);
             this.label8.TabIndex = 20;
@@ -279,7 +254,7 @@
             // 
             // txtrenk
             // 
-            this.txtrenk.Location = new System.Drawing.Point(173, 167);
+            this.txtrenk.Location = new System.Drawing.Point(174, 118);
             this.txtrenk.Name = "txtrenk";
             this.txtrenk.Size = new System.Drawing.Size(212, 34);
             this.txtrenk.TabIndex = 11;
@@ -287,7 +262,7 @@
             // label11
             // 
             this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(7, 128);
+            this.label11.Location = new System.Drawing.Point(8, 79);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(99, 29);
             this.label11.TabIndex = 14;
@@ -295,7 +270,7 @@
             // 
             // txtcip
             // 
-            this.txtcip.Location = new System.Drawing.Point(173, 126);
+            this.txtcip.Location = new System.Drawing.Point(174, 77);
             this.txtcip.Name = "txtcip";
             this.txtcip.Size = new System.Drawing.Size(212, 34);
             this.txtcip.TabIndex = 10;
@@ -303,7 +278,7 @@
             // label12
             // 
             this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(7, 86);
+            this.label12.Location = new System.Drawing.Point(8, 37);
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(158, 29);
             this.label12.TabIndex = 13;
@@ -311,7 +286,7 @@
             // 
             // txtpass
             // 
-            this.txtpass.Location = new System.Drawing.Point(173, 85);
+            this.txtpass.Location = new System.Drawing.Point(174, 36);
             this.txtpass.Name = "txtpass";
             this.txtpass.Size = new System.Drawing.Size(212, 34);
             this.txtpass.TabIndex = 9;
@@ -319,47 +294,36 @@
             // label13
             // 
             this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(7, 170);
+            this.label13.Location = new System.Drawing.Point(8, 121);
             this.label13.Name = "label13";
             this.label13.Size = new System.Drawing.Size(75, 29);
             this.label13.TabIndex = 15;
             this.label13.Text = "Renk:";
             // 
-            // txtad
-            // 
-            this.txtad.Location = new System.Drawing.Point(173, 44);
-            this.txtad.Name = "txtad";
-            this.txtad.Size = new System.Drawing.Size(212, 34);
-            this.txtad.TabIndex = 8;
-            // 
-            // label14
-            // 
-            this.label14.AutoSize = true;
-            this.label14.Location = new System.Drawing.Point(7, 44);
-            this.label14.Name = "label14";
-            this.label14.Size = new System.Drawing.Size(48, 29);
-            this.label14.TabIndex = 12;
-            this.label14.Text = "Ad:";
-            // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(12, 237);
+            this.button2.Font = new System.Drawing.Font("Microsoft Sans Serif", 16.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.button2.Location = new System.Drawing.Point(14, 237);
             this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(331, 102);
+            this.button2.Size = new System.Drawing.Size(350, 102);
             this.button2.TabIndex = 14;
             this.button2.Text = "Düzenle";
             this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
             // HızlıDüzenlemeForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1073, 518);
+            this.ClientSize = new System.Drawing.Size(781, 396);
             this.Controls.Add(this.button2);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.Name = "HızlıDüzenlemeForm";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "HızlıDüzenlemeForm";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.HızlıDüzenlemeForm_FormClosing);
+            this.Load += new System.EventHandler(this.HızlıDüzenlemeForm_Load);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.groupBox2.ResumeLayout(false);
@@ -380,8 +344,6 @@
         private System.Windows.Forms.TextBox txtsahipad;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.GroupBox groupBox2;
-        private System.Windows.Forms.Label label10;
-        private System.Windows.Forms.ComboBox comboBox1;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.TextBox txtnot;
         private System.Windows.Forms.TextBox txtür;
@@ -398,8 +360,6 @@
         private System.Windows.Forms.Label label12;
         private System.Windows.Forms.TextBox txtpass;
         private System.Windows.Forms.Label label13;
-        private System.Windows.Forms.TextBox txtad;
-        private System.Windows.Forms.Label label14;
         private System.Windows.Forms.Button button2;
     }
 }

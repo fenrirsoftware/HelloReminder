@@ -440,6 +440,7 @@
             this.Margin = new System.Windows.Forms.Padding(5);
             this.Name = "HastaForm";
             this.Text = "HastaForm";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.HastaForm_FormClosing);
             this.Load += new System.EventHandler(this.HastaForm_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             this.groupBox1.ResumeLayout(false);

@@ -33,7 +33,7 @@ namespace temizHCO
 
         private void UpdateValue(Label label, int targetValue, Timer timer)
         {
-            int currentValue = Convert.ToInt32(label.Text);
+            int currentValue = Convert.ToInt16(label.Text);
 
             if (currentValue < targetValue)
             {
@@ -108,30 +108,43 @@ namespace temizHCO
         private void button1_Click_1(object sender, EventArgs e)
         {
             HastaSahibiForm hsb = new HastaSahibiForm();
-            hsb.Show(); 
+            hsb.Show();
+            this.Hide();
         }
 
         private void button2_Click_1(object sender, EventArgs e)
         {
             HastaForm h = new HastaForm();
             h.Show();
+            this.Hide();
         }
 
         private void button3_Click(object sender, EventArgs e)
         {
             AşıForm a = new AşıForm();
             a.Show();
+            this.Hide();
         }
 
         private void button4_Click(object sender, EventArgs e)
         {
             Görüntüleme g = new Görüntüleme();
             g.Show();
+            this.Hide();
         }
 
         private void Form1_Load_1(object sender, EventArgs e)
         {
 
+        }
+
+       
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+
+            Reminder r = new Reminder();
+            r.Show();
         }
     }
 }

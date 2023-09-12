@@ -236,5 +236,11 @@ namespace temizHCO
                 LoadHastaSahipleriData();
             }
         }
+
+        private void HastaSahibiForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            Form1 fr = new Form1();
+            fr.Show();
+        }
     }
 }

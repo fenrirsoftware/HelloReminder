@@ -42,6 +42,7 @@
             this.label1 = new System.Windows.Forms.Label();
             this.button4 = new System.Windows.Forms.Button();
             this.dateTimePicker1 = new System.Windows.Forms.DateTimePicker();
+            this.button6 = new System.Windows.Forms.Button();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             this.panel3.SuspendLayout();
@@ -179,9 +180,9 @@
             // button4
             // 
             this.button4.Font = new System.Drawing.Font("Microsoft Sans Serif", 19.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-            this.button4.Location = new System.Drawing.Point(129, 317);
+            this.button4.Location = new System.Drawing.Point(8, 284);
             this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(468, 43);
+            this.button4.Size = new System.Drawing.Size(311, 49);
             this.button4.TabIndex = 5;
             this.button4.Text = "Kayıtları Görüntüle";
             this.button4.UseVisualStyleBackColor = true;
@@ -195,11 +196,23 @@
             this.dateTimePicker1.Size = new System.Drawing.Size(395, 38);
             this.dateTimePicker1.TabIndex = 6;
             // 
+            // button6
+            // 
+            this.button6.Font = new System.Drawing.Font("Microsoft Sans Serif", 19.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.button6.Location = new System.Drawing.Point(386, 284);
+            this.button6.Name = "button6";
+            this.button6.Size = new System.Drawing.Size(311, 49);
+            this.button6.TabIndex = 8;
+            this.button6.Text = "Reminder";
+            this.button6.UseVisualStyleBackColor = true;
+            this.button6.Click += new System.EventHandler(this.button6_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(706, 361);
+            this.ClientSize = new System.Drawing.Size(706, 366);
+            this.Controls.Add(this.button6);
             this.Controls.Add(this.dateTimePicker1);
             this.Controls.Add(this.button4);
             this.Controls.Add(this.panel3);
@@ -238,6 +251,7 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button button4;
         private System.Windows.Forms.DateTimePicker dateTimePicker1;
+        private System.Windows.Forms.Button button6;
     }
 }
 

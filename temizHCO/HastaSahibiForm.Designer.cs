@@ -239,6 +239,7 @@
             this.Name = "HastaSahibiForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "HSBF";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.HastaSahibiForm_FormClosing);
             this.Load += new System.EventHandler(this.HastaSahibiForm_Load);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();

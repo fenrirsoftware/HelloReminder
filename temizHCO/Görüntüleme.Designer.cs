@@ -49,7 +49,6 @@
             this.toolStripLabel1.Name = "toolStripLabel1";
             this.toolStripLabel1.Size = new System.Drawing.Size(53, 22);
             this.toolStripLabel1.Text = "Arama";
-            this.toolStripLabel1.Click += new System.EventHandler(this.toolStripLabel1_Click);
             // 
             // Görüntüleme
             // 
@@ -60,7 +59,7 @@
             this.Name = "Görüntüleme";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Görüntüleme";
-            this.Load += new System.EventHandler(this.Görüntüleme_Load_1);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Görüntüleme_FormClosing);
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
             this.ResumeLayout(false);

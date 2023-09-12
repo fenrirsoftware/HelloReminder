@@ -321,5 +321,11 @@ namespace temizHCO
                 return DisplayText;
             }
         }
+
+        private void AşıForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            Form1 fr = new Form1();
+            fr.Show();
+        }
     }
 }

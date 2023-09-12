@@ -95,7 +95,7 @@
             // maskedTextBox1
             // 
             this.maskedTextBox1.Location = new System.Drawing.Point(235, 114);
-            this.maskedTextBox1.Mask = "00/00/0000";
+            this.maskedTextBox1.Mask = "0000-00-00";
             this.maskedTextBox1.Name = "maskedTextBox1";
             this.maskedTextBox1.Size = new System.Drawing.Size(132, 34);
             this.maskedTextBox1.TabIndex = 1;
@@ -104,7 +104,7 @@
             // maskedTextBox2
             // 
             this.maskedTextBox2.Location = new System.Drawing.Point(235, 163);
-            this.maskedTextBox2.Mask = "00/00/0000";
+            this.maskedTextBox2.Mask = "0000-00-00";
             this.maskedTextBox2.Name = "maskedTextBox2";
             this.maskedTextBox2.Size = new System.Drawing.Size(132, 34);
             this.maskedTextBox2.TabIndex = 2;
@@ -241,6 +241,7 @@
             this.Margin = new System.Windows.Forms.Padding(5);
             this.Name = "AşıForm";
             this.Text = "AşıForm";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.AşıForm_FormClosing);
             this.Load += new System.EventHandler(this.AşıForm_Load);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();

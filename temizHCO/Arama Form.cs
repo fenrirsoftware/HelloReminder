@@ -1,15 +1,6 @@
 ﻿using Microsoft.Data.Sqlite;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Data.SqlClient;
-using System.Drawing;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace temizHCO
@@ -18,32 +9,29 @@ namespace temizHCO
     {
         public Arama_Form()
         {
-          
             InitializeComponent();
             // Veritabanı bağlantısını açın
             connection = new SqliteConnection(connectionString);
         }
+
         public SqliteConnection connection;
         private string connectionString = "Data Source=HCO.db;"; // Veritabanı bağlantı dizesini buraya ekleyin
 
         private void Arama_Form_Load(object sender, EventArgs e)
         {
-
         }
 
-        private void radioButton1_CheckedChanged(object sender, EventArgs e)
-        {
+       
 
-            //to lower yapacan unutma
-        }
         private void button1_Click(object sender, EventArgs e)
         {
             if (radioButton1.Checked)
             {
-                string belirliHayvanAdi = textBox1.Text.Trim(); // TextBox'tan alınan değeri kullanın
+                string belirliHayvanAdi = textBox1.Text.Trim();
                 string query = $"SELECT Hayvanlar.HayvanID FROM Hayvanlar WHERE Hayvanlar.Ad LIKE '%{belirliHayvanAdi}%'";
 
-
+               
+               
 
                 ExecuteQueryAndShowResult(query);
             }
@@ -57,7 +45,7 @@ namespace temizHCO
                                $"WHERE HastaSahipleri.TCKimlik = '{tcKimlik}'";
 
                 List<int> hayvanIDList = new List<int>();
-                List<string> hayvanAdList = new List<string>(); // Hayvan adlarını saklamak için yeni bir liste ekledik
+                List<string> hayvanAdList = new List<string>();
 
                 using (SqliteConnection sqliteConnection = new SqliteConnection(connectionString))
                 {
@@ -71,9 +59,7 @@ namespace temizHCO
                         hayvanIDList.Add(hayvanID);
 
                         string hayvanAdi = reader["HayvanAdi"].ToString();
-                        hayvanAdList.Add(hayvanAdi); // Hayvan adını listeye ekledik
-
-                        // MessageBox.Show($"Hayvan Adı: {hayvanAdi}", "Sonuçlar"); // Bu satırı kaldırdık
+                        hayvanAdList.Add(hayvanAdi);
                     }
 
                     reader.Close();
@@ -88,7 +74,7 @@ namespace temizHCO
                     secimForm.Size = new System.Drawing.Size(300, 150);
 
                     Label label = new Label();
-                    label.Text = "Lütfen bir hayvan seçin (Hayvan Adı):"; // Kullanıcının görmesi için metni değiştirdik
+                    label.Text = "Lütfen bir hayvan seçin (Hayvan Adı):";
                     label.Location = new System.Drawing.Point(10, 10);
                     secimForm.Controls.Add(label);
 
@@ -97,7 +83,7 @@ namespace temizHCO
                     comboBox.Location = new System.Drawing.Point(10, 40);
                     foreach (string ad in hayvanAdList)
                     {
-                        comboBox.Items.Add(ad); // Hayvan adını kullanıcıya gösteriyoruz
+                        comboBox.Items.Add(ad);
                     }
                     secimForm.Controls.Add(comboBox);
 
@@ -108,9 +94,15 @@ namespace temizHCO
                     {
                         if (comboBox.SelectedItem != null)
                         {
-                            // Kullanıcının seçtiği hayvan adını kullanarak hayvan ID'sini alıyoruz
                             secilenHayvanID = hayvanIDList[hayvanAdList.IndexOf(comboBox.SelectedItem.ToString())];
+
+
+                            
+
                             secimForm.Close();
+                         
+
+
                         }
                         else
                         {
@@ -120,6 +112,8 @@ namespace temizHCO
                     secimForm.Controls.Add(button);
 
                     secimForm.ShowDialog();
+
+                  
                 }
                 else if (hayvanIDList.Count == 1)
                 {
@@ -133,28 +127,25 @@ namespace temizHCO
                 if (secilenHayvanID != -1)
                 {
                     MessageBox.Show($"Seçilen Hayvan ID: {secilenHayvanID}", "Seçilen Hayvan");
+                    HızlıDüzenlemeForm fr = new HızlıDüzenlemeForm();
+                    fr.veri = secilenHayvanID.ToString();
+                    fr.Show();
                 }
+
+              
             }
-
-
             else if (radioButton3.Checked)
             {
                 string pasaportNumarasi = textBox1.Text.Trim();
                 string query = $"SELECT Hayvanlar.HayvanID FROM Hayvanlar WHERE Hayvanlar.PasaportNumarasi = '{pasaportNumarasi}'";
-
-
                 ExecuteQueryAndShowResult(query);
             }
             else if (radioButton4.Checked)
             {
                 string cipNumarasi = textBox1.Text.Trim();
                 string query = $"SELECT Hayvanlar.HayvanID FROM Hayvanlar WHERE Hayvanlar.CipNumarasi = '{cipNumarasi}'";
-
-
                 ExecuteQueryAndShowResult(query);
             }
-
-
             else if (radioButton5.Checked)
             {
                 string adsoyad = textBox1.Text.Trim();
@@ -167,10 +158,10 @@ namespace temizHCO
                                "LEFT JOIN HayvanAsi ON Hayvanlar.HayvanID = HayvanAsi.HayvanID " +
                                "LEFT JOIN Asilar ON HayvanAsi.AsiTakipID = Asilar.AsiTakipID " +
                                $"WHERE HastaSahipleri.Ad LIKE '%{adsoyad}%' OR HastaSahipleri.Soyad LIKE '%{adsoyad}%' " +
-                               $"OR (HastaSahipleri.Ad || ' ' || HastaSahipleri.Soyad) LIKE '%{adsoyad}%'"; // LIKE kullanıldı
+                               $"OR (HastaSahipleri.Ad || ' ' || HastaSahipleri.Soyad) LIKE '%{adsoyad}%'";
 
                 List<int> hayvanIDList = new List<int>();
-                List<string> hayvanAdList = new List<string>(); // Hayvan adlarını saklamak için yeni bir liste ekledik
+                List<string> hayvanAdList = new List<string>();
 
                 using (SqliteConnection sqliteConnection = new SqliteConnection(connectionString))
                 {
@@ -184,21 +175,19 @@ namespace temizHCO
                         hayvanIDList.Add(hayvanID);
 
                         string hayvanAdi = reader["HayvanAdi"].ToString();
-                        hayvanAdList.Add(hayvanAdi); // Hayvan adını listeye ekledik
-
-                        // MessageBox.Show($"Hayvan Adı: {hayvanAdi}", "Sonuçlar"); // Bu satırı kaldırdık
+                        hayvanAdList.Add(hayvanAdi);
                     }
 
                     reader.Close();
                 }
-
+             
                 int secilenHayvanID = -1;
                 if (hayvanIDList.Count > 1)
                 {
                     Form secimForm = new Form();
                     secimForm.Text = "Hayvan Seçimi";
                     secimForm.StartPosition = FormStartPosition.CenterScreen;
-                    secimForm.Size = new System.Drawing.Size(300, 150); // Boyutu düşürdük
+                    secimForm.Size = new System.Drawing.Size(300, 150);
 
                     Label label = new Label();
                     label.Text = "Lütfen bir hayvan seçin:";
@@ -223,6 +212,9 @@ namespace temizHCO
                         {
                             secilenHayvanID = hayvanIDList[hayvanAdList.IndexOf(comboBox.SelectedItem.ToString())];
                             secimForm.Close();
+
+                         
+
                         }
                         else
                         {
@@ -233,21 +225,18 @@ namespace temizHCO
 
                     secimForm.ShowDialog();
 
+                    if (comboBox.SelectedItem != null)
                     {
-                        if (comboBox.SelectedItem != null)
-                        {
-                            // Kullanıcının seçtiği hayvan adını kullanarak hayvanın ID'sini alıyoruz
-                            secilenHayvanID = hayvanIDList[hayvanAdList.IndexOf(comboBox.SelectedItem.ToString())];
-                            secimForm.Close();
-                        }
-                        else
-                        {
-                            MessageBox.Show("Geçersiz Hayvan Seçimi. Lütfen geçerli bir seçenek seçin.");
-                        }
-                    };
-                    secimForm.Controls.Add(button);
+                        secilenHayvanID = hayvanIDList[hayvanAdList.IndexOf(comboBox.SelectedItem.ToString())];
+                       
+                        secimForm.Close();
 
-                
+                       
+                    }
+                    else
+                    {
+                        MessageBox.Show("Geçersiz Hayvan Seçimi. Lütfen geçerli bir seçenek seçin.");
+                    }
                 }
                 else if (hayvanIDList.Count == 1)
                 {
@@ -261,14 +250,16 @@ namespace temizHCO
                 if (secilenHayvanID != -1)
                 {
                     MessageBox.Show($"Seçilen Hayvan ID: {secilenHayvanID}", "Seçilen Hayvan");
+                    HızlıDüzenlemeForm fr = new HızlıDüzenlemeForm();
+                    fr.veri = secilenHayvanID.ToString();
+                    fr.Show();
                 }
             }
-        
-
             else
             {
                 MessageBox.Show("Lütfen bir seçim yapınız.");
             }
+
         }
 
         private void ExecuteQueryAndShowResult(string query)
@@ -285,12 +276,16 @@ namespace temizHCO
                 while (reader.Read())
                 {
                     string hayvanAdi = reader["hayvanID"].ToString();
-      
-
                     sonuc += "Hayvan Adı: " + hayvanAdi + "\n";
-    
+
+                    HızlıDüzenlemeForm fr = new HızlıDüzenlemeForm();
+                    fr.veri = hayvanAdi;
+                    fr.Show();
+
+
+
                 }
-                
+
                 reader.Close();
 
                 if (!string.IsNullOrEmpty(sonuc))
@@ -315,7 +310,6 @@ namespace temizHCO
 
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
-
         }
     }
 }
