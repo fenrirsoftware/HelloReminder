@@ -277,6 +277,13 @@ namespace temizHCO
             f.Show();
         }
 
+        private void toolStripLabel1_Click(object sender, EventArgs e)
+        {
+            Arama_Form af =  new Arama_Form();
+            af.Show();
+            
+        }
+
         // Diğer olaylar ve metotlar
     }
 }

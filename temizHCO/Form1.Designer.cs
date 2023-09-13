@@ -182,7 +182,7 @@
             this.button4.Font = new System.Drawing.Font("Microsoft Sans Serif", 19.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
             this.button4.Location = new System.Drawing.Point(8, 284);
             this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(311, 49);
+            this.button4.Size = new System.Drawing.Size(383, 49);
             this.button4.TabIndex = 5;
             this.button4.Text = "Kayıtları Görüntüle";
             this.button4.UseVisualStyleBackColor = true;
@@ -199,9 +199,9 @@
             // button6
             // 
             this.button6.Font = new System.Drawing.Font("Microsoft Sans Serif", 19.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-            this.button6.Location = new System.Drawing.Point(386, 284);
+            this.button6.Location = new System.Drawing.Point(397, 284);
             this.button6.Name = "button6";
-            this.button6.Size = new System.Drawing.Size(311, 49);
+            this.button6.Size = new System.Drawing.Size(300, 49);
             this.button6.TabIndex = 8;
             this.button6.Text = "Reminder";
             this.button6.UseVisualStyleBackColor = true;

@@ -9,89 +9,87 @@ namespace temizHCO
     {
         private SqliteConnection connection;
         private string connectionString = "Data Source=HCO.db;";
-        private DataGridView dataGridView;
+        private DataGridView dataGridView1;
+
 
         public Reminder()
         {
             InitializeComponent();
+            InitializeDataGridView();
+            PopulateDataGridView();
 
-            // DataGridView oluşturma ve ayarları
-            dataGridView = new DataGridView();
-            dataGridView.Dock = DockStyle.Fill;
-            this.Controls.Add(dataGridView);
-
-            // DataGridView için sütunları tanımlama
-            dataGridView.Columns.Add("AsiAdi", "Aşı Adı");
-            dataGridView.Columns.Add("AsiTarihi", "Aşı Tarihi");
-            dataGridView.Columns.Add("AsiTekrarTarihi", "Aşı Tekrar Tarihi");
-            dataGridView.Columns.Add("HayvanAdi", "Hayvan Adı");
-            dataGridView.Columns.Add("CipNumarasi", "Çip Numarası");
-            dataGridView.Columns.Add("PasaportNumarasi", "Pasaport Numarası");
-            dataGridView.Columns.Add("SahipAdi", "Sahip Adı");
-            dataGridView.Columns.Add("SahipSoyadi", "Sahip Soyadı");
-            dataGridView.Columns.Add("SahipTCKimlik", "Sahip TC Kimlik");
-            dataGridView.Columns.Add("SahipTelefon", "Sahip Telefon");
-
-            // Verileri çekme ve DataGridView'e ekleme
-            LoadData();
+           
         }
         /// <summary>
         /// reminder sorunlu sql sorgusu düzeltilecek.
         /// </summary>
-        private void LoadData()
+
+        private void InitializeDataGridView()
         {
-            // Veritabanı bağlantısını açma
-            using (connection = new SqliteConnection(connectionString))
+            dataGridView1 = new DataGridView();
+            dataGridView1.Dock = DockStyle.Fill;
+            Controls.Add(dataGridView1);
+
+
+            dataGridView1.AutoResizeColumns();
+        }
+
+        private void PopulateDataGridView()
+        {
+            DataTable dataTable = new DataTable();
+
+            dataTable.Columns.Add("AsiAdi", typeof(string));
+            dataTable.Columns.Add("AsiTarihi", typeof(DateTime));
+            dataTable.Columns.Add("AsiTekrarTarihi", typeof(DateTime));
+            dataTable.Columns.Add("PasaportNumarasi", typeof(string));
+            dataTable.Columns.Add("CipNumarasi", typeof(string));
+            dataTable.Columns.Add("HayvanAdi", typeof(string));
+            dataTable.Columns.Add("SahipAdi", typeof(string));
+            dataTable.Columns.Add("SahipSoyadi", typeof(string));
+            dataTable.Columns.Add("SahipTelefon", typeof(string));
+            dataTable.Columns.Add("SahipTCKimlik", typeof(string));
+
+            using (SqliteConnection connection = new SqliteConnection(connectionString))
             {
                 connection.Open();
 
-                // SQL sorgusu hazırlama ve verileri çekme (Aşıları 7 günden daha az süre kalanları seçme)
-                string query = "SELECT a.AsiAdi, a.AsiTarihi, a.AsiTekrarTarihi, " +
-                             "h.Ad AS HayvanAdi, h.CipNumarasi, h.PasaportNumarasi, " +
-                             "hs.Ad AS SahipAdi, hs.Soyad AS SahipSoyadi, hs.TCKimlik AS SahipTCKimlik, hs.TelefonNumarasi AS SahipTelefon " +
-                             "FROM HayvanAsi AS ha " +
-                             "INNER JOIN Asilar AS a ON ha.AsiTakipID = a.AsiTakipID " +
-                             "INNER JOIN Hayvanlar AS h ON ha.HayvanID = h.HayvanID " +
-                             "INNER JOIN HastaSahipleri AS hs ON h.SahipID = hs.SahipID " +
-                             "WHERE (julianday(a.AsiTekrarTarihi) - julianday('now')) < 7";
+                string query = @"
+                    SELECT a.AsiAdi, a.AsiTarihi, a.AsiTekrarTarihi,
+                           h.PasaportNumarasi, h.CipNumarasi, h.Ad AS HayvanAdi,
+                           hs.Ad AS SahipAdi, hs.Soyad AS SahipSoyadi, hs.TelefonNumarasi AS SahipTelefon, hs.TCKimlik AS SahipTCKimlik
+                    FROM Asilar AS a
+                    INNER JOIN HayvanAsi AS ha ON a.AsiTakipID = ha.AsiTakipID
+                    INNER JOIN Hayvanlar AS h ON ha.HayvanID = h.HayvanID
+                    INNER JOIN HayvanHastaSahipleri AS hhs ON h.HayvanID = hhs.HayvanID
+                    INNER JOIN HastaSahipleri AS hs ON hhs.SahipID = hs.SahipID
+                    WHERE julianday(a.AsiTekrarTarihi) - julianday('now') < 7;
+                ";
 
                 using (SqliteCommand command = new SqliteCommand(query, connection))
+                using (SqliteDataReader reader = command.ExecuteReader())
                 {
-                    using (SqliteDataReader reader = command.ExecuteReader())
+                    while (reader.Read())
                     {
-                        // Verileri DataGridView'e ekleme
-                        while (reader.Read())
-                        {
-                            string asiAdi = reader.GetString(0);
-                            string asiTarihiStr = reader.GetString(1);
-                            string asiTekrarTarihiStr = reader.GetString(2);
-                            string hayvanAdi = reader.GetString(3);
-                            string cipNumarasi = reader.GetString(4);
-                            string pasaportNumarasi = reader.GetString(5);
-                            string sahipAdi = reader.GetString(6);
-                            string sahipSoyadi = reader.GetString(7);
-                            string sahipTCKimlik = reader.GetString(8);
-                            string sahipTelefon = reader.GetString(9);
+                        dataTable.Rows.Add(
+      reader["AsiAdi"],
+      reader.GetDateTime(reader.GetOrdinal("AsiTarihi")),
+      reader.GetDateTime(reader.GetOrdinal("AsiTekrarTarihi")),
+      reader["PasaportNumarasi"],
+      reader["CipNumarasi"],
+      reader["HayvanAdi"],
+      reader["SahipAdi"],
+      reader["SahipSoyadi"],
+      reader["SahipTelefon"],
+      reader["SahipTCKimlik"]
+  );
 
-                            // Tarihleri ayrıştırma işlemi
-                            DateTime asiTarihi;
-                            DateTime asiTekrarTarihi;
-
-                            if (DateTime.TryParseExact(asiTarihiStr, "dd.MM.yyyy", null, System.Globalization.DateTimeStyles.None, out asiTarihi) &&
-                                DateTime.TryParseExact(asiTekrarTarihiStr, "dd.MM.yyyy", null, System.Globalization.DateTimeStyles.None, out asiTekrarTarihi))
-                            {
-                                dataGridView.Rows.Add(asiAdi, asiTarihi.ToShortDateString(), asiTekrarTarihi.ToShortDateString(),
-                                    hayvanAdi, cipNumarasi, pasaportNumarasi, sahipAdi, sahipSoyadi, sahipTCKimlik, sahipTelefon);
-                            }
-                            else
-                            {
-                                // Tarih ayrıştırma hatası
-                                MessageBox.Show($"Geçersiz tarih formatı: {asiTarihiStr} veya {asiTekrarTarihiStr}");
-                            }
-                        }
                     }
                 }
+
+                connection.Close();
             }
+
+            dataGridView1.DataSource = dataTable;
         }
     }
 }
