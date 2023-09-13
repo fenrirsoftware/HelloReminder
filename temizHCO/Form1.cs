@@ -142,9 +142,10 @@ namespace temizHCO
 
         private void button6_Click(object sender, EventArgs e)
         {
-
             Reminder r = new Reminder();
             r.Show();
+            this.Hide();
+            
         }
     }
 }
