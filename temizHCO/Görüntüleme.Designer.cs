@@ -61,6 +61,7 @@
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Görüntüleme";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Görüntüleme_FormClosing);
+            this.Load += new System.EventHandler(this.Görüntüleme_Load_1);
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
             this.ResumeLayout(false);

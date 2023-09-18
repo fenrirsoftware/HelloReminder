@@ -36,6 +36,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1375, 450);
             this.Name = "Reminder";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Reminder_FormClosing);
             this.Load += new System.EventHandler(this.Reminder_Load);
             this.ResumeLayout(false);
 

@@ -8,6 +8,7 @@ namespace temizHCO
     public partial class AşıForm : Form
     {
         private string connectionString = "Data Source=HCO.db;";
+        private int selectedAsiTakipID = -1; // Seçilen Aşı Takip ID'si
 
         public AşıForm()
         {
@@ -28,7 +29,7 @@ namespace temizHCO
             {
                 connection.Open();
                 string query = @"SELECT Asilar.AsiTakipID, Asilar.AsiAdi, Asilar.AsiTarihi, Asilar.AsiTekrarTarihi, 
-                                Hayvanlar.Ad AS HayvanAdi, Hayvanlar.PasaportNumarasi
+                                Asilar.AsiSeriNo, Hayvanlar.Ad AS HayvanAdi, Hayvanlar.PasaportNumarasi
                          FROM Asilar
                          LEFT JOIN HayvanAsi ON Asilar.AsiTakipID = HayvanAsi.AsiTakipID
                          LEFT JOIN Hayvanlar ON HayvanAsi.HayvanID = Hayvanlar.HayvanID";
@@ -43,20 +44,17 @@ namespace temizHCO
                             string asiAdi = reader.GetString(1);
                             string asiTarihi = reader.GetString(2);
                             string asiTekrarTarihi = reader.GetString(3);
+                            string hayvanAdi = reader.IsDBNull(5) ? "" : reader.GetString(5);
+                            string pasaportNumarasi = reader.IsDBNull(6) ? "" : reader.GetString(6);
 
-
-                            string hayvanAdi = reader.IsDBNull(4) ? "" : reader.GetString(4);
-                            string pasaportNumarasi = reader.IsDBNull(5) ? "" : reader.GetString(5);
-
-                            dataGridView1.Rows.Add(asiTakipID, asiAdi, asiTarihi, asiTekrarTarihi, hayvanAdi, pasaportNumarasi);
+                            string asiSeriNo = reader.IsDBNull(4) ? "" : reader.GetString(4);
+                            dataGridView1.Rows.Add(asiTakipID, asiAdi, asiTarihi, asiTekrarTarihi,hayvanAdi, pasaportNumarasi, asiSeriNo);
                         }
                     }
                 }
-                
+
                 connection.Close();
             }
-
-          
         }
 
         private void LoadHayvanComboBox()
@@ -98,11 +96,13 @@ namespace temizHCO
                 textBox1.Text = selectedRow.Cells["AşıAd"].Value.ToString();
                 maskedTextBox1.Text = selectedRow.Cells["ABT"].Value.ToString();
                 maskedTextBox2.Text = selectedRow.Cells["ATT"].Value.ToString();
+                textBox2.Text = selectedRow.Cells["AsiSeriNo"].Value.ToString();
                 comboBox1.Text = "";
+                
                 comboBox1.Items.Clear();
                 LoadHayvanComboBox();
 
-                int aşıTakipID = Convert.ToInt32(selectedRow.Cells["ID"].Value);
+                selectedAsiTakipID = Convert.ToInt32(selectedRow.Cells["ID"].Value);
                 using (SqliteConnection connection = new SqliteConnection(connectionString))
                 {
                     connection.Open();
@@ -112,7 +112,7 @@ namespace temizHCO
 
                     using (SqliteCommand command = new SqliteCommand(query, connection))
                     {
-                        command.Parameters.AddWithValue("@AsiTakipID", aşıTakipID);
+                        command.Parameters.AddWithValue("@AsiTakipID", selectedAsiTakipID);
 
                         using (SqliteDataReader reader = command.ExecuteReader())
                         {
@@ -125,12 +125,11 @@ namespace temizHCO
                                 if (selectedComboBoxItem != null)
                                 {
                                     comboBox1.SelectedItem = selectedComboBoxItem;
-                                   
                                 }
                             }
                         }
                     }
-                   
+
                     connection.Close();
                 }
             }
@@ -141,55 +140,69 @@ namespace temizHCO
             string isim = textBox1.Text;
             string baslangic = maskedTextBox1.Text;
             string tekerrür = maskedTextBox2.Text;
+            string asiSeriNo = textBox2.Text;
 
-            string message = $"Eklemek istediğiniz Aşı bilgileri:\n\nAd: {isim}\nBaşlangıç: {baslangic}\nTekerrür: {tekerrür}\n\n\nBu veriyi eklemek istiyor musunuz?";
+            string message = $"Eklemek istediğiniz Aşı bilgileri:\n\nAd: {isim}\nBaşlangıç: {baslangic}\nTekerrür: {tekerrür}\nSeri No: {asiSeriNo}\n\n\nBu veriyi eklemek istiyor musunuz?";
             DialogResult result = MessageBox.Show(message, "Aşı Ekleme Onayı", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
             if (result == DialogResult.Yes)
             {
+                long lastInsertedAsiTakipID = -1; // Yeni eklenen aşının AsiTakipID'sini saklamak için
+
                 using (SqliteConnection connection = new SqliteConnection(connectionString))
                 {
                     connection.Open();
 
-                    string insertQuery = "INSERT INTO Asilar (AsiAdi, AsiTarihi, AsiTekrarTarihi) VALUES (@AsiAdi, @AsiTarihi, @AsiTekrarTarihi)";
+                    string insertQuery = "INSERT INTO Asilar (AsiAdi, AsiTarihi, AsiTekrarTarihi, AsiSeriNo) VALUES (@AsiAdi, @AsiTarihi, @AsiTekrarTarihi, @AsiSeriNo)";
                     using (SqliteCommand insertCommand = new SqliteCommand(insertQuery, connection))
                     {
                         insertCommand.Parameters.AddWithValue("@AsiAdi", isim);
                         insertCommand.Parameters.AddWithValue("@AsiTarihi", baslangic);
                         insertCommand.Parameters.AddWithValue("@AsiTekrarTarihi", tekerrür);
+                        insertCommand.Parameters.AddWithValue("@AsiSeriNo", asiSeriNo);
                         insertCommand.ExecuteNonQuery();
 
-                        string selectLastInsertID = "SELECT last_insert_rowid()";
-                        using (SqliteCommand selectCommand = new SqliteCommand(selectLastInsertID, connection))
+                        // Yeni eklenen aşının AsiTakipID'sini almak için aşağıdaki sorguyu kullanabilirsiniz.
+                        string selectLastInsertIDQuery = "SELECT last_insert_rowid()";
+                        using (SqliteCommand selectLastInsertIDCommand = new SqliteCommand(selectLastInsertIDQuery, connection))
                         {
-                            int asiTakipID = Convert.ToInt32(selectCommand.ExecuteScalar());
-
-                            ComboBoxItem selectedComboBoxItem = comboBox1.SelectedItem as ComboBoxItem;
-
-                            if (selectedComboBoxItem != null)
-                            {
-                                int hayvanID = selectedComboBoxItem.HayvanID;
-
-                                string ilişkilendirmeQuery = "INSERT INTO HayvanAsi (HayvanID, AsiTakipID) VALUES (@HayvanID, @AsiTakipID)";
-                                using (SqliteCommand ilişkilendirmeCommand = new SqliteCommand(ilişkilendirmeQuery, connection))
-                                {
-                                    ilişkilendirmeCommand.Parameters.AddWithValue("@HayvanID", hayvanID);
-                                    ilişkilendirmeCommand.Parameters.AddWithValue("@AsiTakipID", asiTakipID);
-                                    ilişkilendirmeCommand.ExecuteNonQuery();
-                                }
-                            }
+                            lastInsertedAsiTakipID = (long)selectLastInsertIDCommand.ExecuteScalar();
                         }
-
-                        connection.Close();
                     }
+
+                    // Şimdi, bu yeni eklenen aşıyı belirli bir hayvana ilişkilendirmek için ilgili kodu ekleyebilirsiniz.
+                    // ComboBox veya benzeri bir arayüzden hangi hayvanı seçmek istediğinizi seçmelisiniz.
+                    // Bu seçimi alıp ilgili aşıyı seçilen hayvana ilişkilendirmelisiniz.
+                    // İşte bu ilişkilendirme işlemi için örnek bir kod:
+
+                    // ComboBox'tan seçilen hayvanın ID'sini alın
+                    ComboBoxItem selectedComboBoxItem = comboBox1.SelectedItem as ComboBoxItem;
+                    if (selectedComboBoxItem != null)
+                    {
+                        int hayvanID = selectedComboBoxItem.HayvanID;
+
+                        // Yeni eklenen aşıyı seçilen hayvana ilişkilendirmek için SQL sorgusu
+                        string ilişkilendirmeQuery = "INSERT INTO HayvanAsi (HayvanID, AsiTakipID) VALUES (@HayvanID, @AsiTakipID)";
+                        using (SqliteCommand ilişkilendirmeCommand = new SqliteCommand(ilişkilendirmeQuery, connection))
+                        {
+                            ilişkilendirmeCommand.Parameters.AddWithValue("@HayvanID", hayvanID);
+                            ilişkilendirmeCommand.Parameters.AddWithValue("@AsiTakipID", lastInsertedAsiTakipID); // Asi Takip ID, yeni eklenen aşının ID'si olmalıdır.
+                            ilişkilendirmeCommand.ExecuteNonQuery();
+                        }
+                    }
+
+                    connection.Close();
                 }
 
                 LoadAşıData();
                 textBox1.Clear();
                 maskedTextBox1.Clear();
                 maskedTextBox2.Clear();
+                textBox2.Clear();
             }
         }
+
+
 
         private void button2_Click(object sender, EventArgs e)
         {
@@ -220,6 +233,7 @@ namespace temizHCO
             string yeniAsiAdi = textBox1.Text;
             string yeniAsiTarihi = maskedTextBox1.Text;
             string yeniAsiTekrarTarihi = maskedTextBox2.Text;
+            string yeniAsiSeriNo = textBox2.Text;
 
             // Veriyi kullanıcıya onaylat
             string message = $"Seçilen aşının bilgilerini güncellemek istiyor musunuz?";
@@ -240,12 +254,13 @@ namespace temizHCO
                     }
 
                     // Aşı adı ve diğer bilgileri güncelle
-                    string updateQuery = "UPDATE Asilar SET AsiAdi = @YeniAsiAdi, AsiTarihi = @YeniAsiTarihi, AsiTekrarTarihi = @YeniAsiTekrarTarihi WHERE AsiTakipID = @AsiTakipID";
+                    string updateQuery = "UPDATE Asilar SET AsiAdi = @YeniAsiAdi, AsiTarihi = @YeniAsiTarihi, AsiTekrarTarihi = @YeniAsiTekrarTarihi, AsiSeriNo = @YeniAsiSeriNo WHERE AsiTakipID = @AsiTakipID";
                     using (SqliteCommand updateCommand = new SqliteCommand(updateQuery, connection))
                     {
                         updateCommand.Parameters.AddWithValue("@YeniAsiAdi", yeniAsiAdi);
                         updateCommand.Parameters.AddWithValue("@YeniAsiTarihi", yeniAsiTarihi);
                         updateCommand.Parameters.AddWithValue("@YeniAsiTekrarTarihi", yeniAsiTekrarTarihi);
+                        updateCommand.Parameters.AddWithValue("@YeniAsiSeriNo", yeniAsiSeriNo);
                         updateCommand.Parameters.AddWithValue("@AsiTakipID", asiTakipID);
 
                         updateCommand.ExecuteNonQuery();
@@ -267,14 +282,13 @@ namespace temizHCO
                 textBox1.Clear();
                 maskedTextBox1.Clear();
                 maskedTextBox2.Clear();
+                textBox2.Clear();
 
                 // ComboBox ve DataGridView'i temizle
                 comboBox1.SelectedIndex = -1;
                 dataGridView1.ClearSelection();
             }
         }
-
-
 
         private void button3_Click(object sender, EventArgs e)
         {
@@ -326,6 +340,16 @@ namespace temizHCO
         {
             Form1 fr = new Form1();
             fr.Show();
+        }
+
+        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+
+        }
+
+        private void dataGridView1_CellContentClick_1(object sender, DataGridViewCellEventArgs e)
+        {
+
         }
     }
 }

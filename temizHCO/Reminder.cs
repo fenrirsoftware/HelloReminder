@@ -15,7 +15,7 @@ namespace temizHCO
         private SqliteConnection connection;
         private string connectionString = "Data Source=HCO.db;";
         private DataGridView dataGridView1;
-        private long chatId = 1058087196; // Telegram chat ID'sini buraya ekleyin
+        private long chatId =1058087196; // Telegram chat ID'sini buraya ekleyin
         private string botApiToken = "6022733274:AAEo67PBt9cnSrffmtQ3DZRjUop6wgRExwk";
 
         public Reminder()
@@ -42,6 +42,7 @@ namespace temizHCO
             dataTable.Columns.Add("AsiAdi", typeof(string));
             dataTable.Columns.Add("AsiTarihi", typeof(DateTime));
             dataTable.Columns.Add("AsiTekrarTarihi", typeof(DateTime));
+            dataTable.Columns.Add("AsiSeriNo",typeof(string));
             dataTable.Columns.Add("PasaportNumarasi", typeof(string));
             dataTable.Columns.Add("CipNumarasi", typeof(string));
             dataTable.Columns.Add("HayvanAdi", typeof(string));
@@ -55,7 +56,7 @@ namespace temizHCO
                 connection.Open();
 
                 string query = @"
-                    SELECT a.AsiAdi, a.AsiTarihi, a.AsiTekrarTarihi,
+                    SELECT a.AsiAdi, a.AsiTarihi, a.AsiTekrarTarihi,AsiSeriNo,
                            h.PasaportNumarasi, h.CipNumarasi, h.Ad AS HayvanAdi,
                            hs.Ad AS SahipAdi, hs.Soyad AS SahipSoyadi, hs.TelefonNumarasi AS SahipTelefon, hs.TCKimlik AS SahipTCKimlik
                     FROM Asilar AS a
@@ -75,6 +76,7 @@ namespace temizHCO
                             reader["AsiAdi"],
                             reader.GetDateTime(reader.GetOrdinal("AsiTarihi")),
                             reader.GetDateTime(reader.GetOrdinal("AsiTekrarTarihi")),
+                            reader["AsiSeriNo"],
                             reader["PasaportNumarasi"],
                             reader["CipNumarasi"],
                             reader["HayvanAdi"],
@@ -134,19 +136,20 @@ namespace temizHCO
 
 
 
-                string message = $"<b>Asi Bilgileri:</b>\n" +
-                                 $"<i>Asi Adı:</i> {row["AsiAdi"]}\n" +
-                                 $"<i>Asi Tarihi:</i> {((DateTime)row["AsiTarihi"]).ToShortDateString()}\n" +
-                                 $"<i>Asi Tekrar Tarihi:</i> {((DateTime)row["AsiTekrarTarihi"]).ToShortDateString()}\n" +
-                                 $"<i>Pasaport Numarası:</i> {row["PasaportNumarasi"]}\n" +
-                                 $"<i>Cip Numarası:</i> {row["CipNumarasi"]}\n" +
-                                 $"<i>Hayvan Adı:</i> {row["HayvanAdi"]}\n" +
-                                 $"<i>Sahip Adı:</i> {row["SahipAdi"]}\n" +
-                                 $"<i>Sahip Soyadı:</i> {row["SahipSoyadi"]}\n" +
-                                 $"<i>Sahip Telefon:</i> <a href='tel:{phoneNumber}'>{phoneNumber}</a>\n" +
-                                 $"<i>Sahip TCKimlik:</i> {row["SahipTCKimlik"]}\n" +
-                                 $"<i>Kalan Gün Sayısı:</i> {((DateTime)row["AsiTekrarTarihi"] - DateTime.Now).Days} gün\n" +
-                                 "\n------------------------\n";
+                string message = $"<b>{DateTime.Now.ToString("D")} Asi Bilgileri:</b>\n" +
+      $"<i>Asi Adı:</i> {row["AsiAdi"]}\n" +
+      $"<i>Asi Tarihi:</i> {((DateTime)row["AsiTarihi"]).ToShortDateString()}\n" +
+      $"<i>Asi Tekrar Tarihi:</i> {((DateTime)row["AsiTekrarTarihi"]).ToShortDateString()}\n" +
+      $"<i>Pasaport Numarası:</i> {row["PasaportNumarasi"]}\n" +
+      $"<i>Cip Numarası:</i> {row["CipNumarasi"]}\n" +
+      $"<i>Hayvan Adı:</i> {row["HayvanAdi"]}\n" +
+      $"<i>Sahip Adı:</i> {row["SahipAdi"]} {row["SahipSoyadi"]}\n" +
+      $"<i>Sahip Telefon:</i> <a href='tel:{phoneNumber}'>{phoneNumber}</a>\n" +
+      $"<i>Sahip TCKimlik:</i> {row["SahipTCKimlik"]}\n" +
+      "\n------------------------\n" +
+      $"<b>Kalan Gün Sayısı:</b> {((DateTime)row["AsiTekrarTarihi"] - DateTime.Now).Days} GÜN\n" +
+      "\n------------------------\n";
+
 
                 messages.Add(message);
             }
@@ -157,6 +160,12 @@ namespace temizHCO
         private void Reminder_Load(object sender, EventArgs e)
         {
             // Load event handler kodu buraya gelecek
+        }
+
+        private void Reminder_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            Form1 f1 = new Form1();
+            f1.Show();
         }
     }
 }

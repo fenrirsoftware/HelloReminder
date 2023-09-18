@@ -111,7 +111,7 @@
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(78, 90);
             this.label3.TabIndex = 7;
-            this.label3.Text = "9";
+            this.label3.Text = "0";
             // 
             // panel2
             // 
@@ -143,7 +143,7 @@
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(78, 90);
             this.label2.TabIndex = 6;
-            this.label2.Text = "9";
+            this.label2.Text = "0";
             // 
             // panel3
             // 
@@ -175,7 +175,7 @@
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(78, 90);
             this.label1.TabIndex = 5;
-            this.label1.Text = "9";
+            this.label1.Text = "0";
             // 
             // button4
             // 
@@ -211,6 +211,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackColor = System.Drawing.SystemColors.ControlLightLight;
             this.ClientSize = new System.Drawing.Size(706, 366);
             this.Controls.Add(this.button6);
             this.Controls.Add(this.dateTimePicker1);
