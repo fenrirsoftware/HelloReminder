@@ -3,6 +3,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.IO;
 using System.Windows.Forms;
+using System.Xml;
 
 namespace temizHCO
 {
@@ -132,70 +133,18 @@ namespace temizHCO
         }
         string connection1String = "server=.; Initial Catalog=HcoDb; Integrated Security=SSPI"; 
         string outputDirectory = Path.Combine(Application.StartupPath, "Files");
+        //...
+
         private void Form1_Load_1(object sender, EventArgs e)
         {
-            acilis a = new acilis();
-            a.Close();
-
-
-            try
-            {
-                // Metin dosyasının kaydedileceği klasörün yolu
-
-
-                // Klasörü oluştur (varsa zaten oluşturulmuş olabilir)
-                Directory.CreateDirectory(outputDirectory);
-
-                using (SqlConnection connection = new SqlConnection(connection1String))
-                {
-                    connection.Open();
-
-                    // SQL sorgusu
-                    string query = @"
-                -- Tüm hayvanlar, aşılar ve sahipleri için ilişkileri ve verileri al
-                SELECT 
-                    H.HayvanID, H.Ad AS HayvanAdi, H.Tur AS HayvanTuru,
-                    A.AsiTakipID, A.AsiAdi AS AsiAdi, A.AsiTarihi, A.AsiTekrarTarihi, A.AsiSeriNo,
-                    S.SahipID, S.Ad AS SahipAdi, S.Soyad AS SahipSoyadi, S.TCKimlik, S.TelefonNumarasi
-                FROM Hayvanlar H
-                JOIN HayvanHastaSahipleri HS ON H.HayvanID = HS.HayvanID
-                JOIN HastaSahipleri S ON HS.SahipID = S.SahipID
-                JOIN HayvanAsi HA ON H.HayvanID = HA.HayvanID
-                JOIN Asilar A ON HA.AsiTakipID = A.AsiTakipID
-            ";
-
-                    using (SqlCommand command = new SqlCommand(query, connection))
-                    {
-                        using (SqlDataReader reader = command.ExecuteReader())
-                        {
-                            // Verileri metin dosyasına yazma
-                            string outputFilePath = Path.Combine(outputDirectory, "veriler.txt");
-                            using (StreamWriter writer = new StreamWriter(outputFilePath))
-                            {
-                                while (reader.Read())
-                                {
-                                    writer.WriteLine($"Hayvan ID: {reader["HayvanID"]}, Hayvan Adı: {reader["HayvanAdi"]}, Hayvan Türü: {reader["HayvanTuru"]}");
-                                    writer.WriteLine($"Asi ID: {reader["AsiTakipID"]}, Asi Adı: {reader["AsiAdi"]}, Asi Tarihi: {reader["AsiTarihi"]}, Asi Tekrar Tarihi: {reader["AsiTekrarTarihi"]}, Asi Seri No: {reader["AsiSeriNo"]}");
-                                    writer.WriteLine($"Sahip ID: {reader["SahipID"]}, Sahip Adı: {reader["SahipAdi"]}, Sahip Soyadı: {reader["SahipSoyadi"]}, TCKimlik: {reader["TCKimlik"]}, Telefon Numarası: {reader["TelefonNumarasi"]}");
-                                    writer.WriteLine("---------------------------------------------------------");
-                                }
-                            }
-                        }
-                    }
-
-                    connection.Close();
-                   
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Hata oluştu: " + ex.Message, "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-
-
-
-
+         
         }
+
+
+       
+
+
+
 
         private void button6_Click(object sender, EventArgs e)
         {
@@ -210,5 +159,7 @@ namespace temizHCO
         }
 
       
+
+
     }
 }

@@ -8,7 +8,7 @@ namespace temizHCO
     public partial class HızlıDüzenlemeForm : Form
     {
         public string veri { get; set; }
-        private string connectionString = ("server=.; Initial Catalog=HcoDb;Integrated Security=SSPI");
+        public string connectionString = ("server=.; Initial Catalog=HcoDb;Integrated Security=SSPI");
         public HızlıDüzenlemeForm()
         {
             InitializeComponent();
@@ -52,6 +52,29 @@ namespace temizHCO
                         txtsahipsoyad.Text = reader["SahipSoyad"].ToString(); // Sahip Soyadı buradan gelsin
                         txtsahipTCkimlik.Text = reader["TCKimlik"].ToString();
                         txtnumara.Text = reader["TelefonNumarasi"].ToString();
+                    }
+
+                    reader.Close();
+                }
+
+
+
+            }
+
+            string asiNameQuery = "SELECT DISTINCT AsiAdi FROM Asilar";
+
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                using (SqlCommand command = new SqlCommand(asiNameQuery, connection))
+                {
+                    SqlDataReader reader = command.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        string asiAdi = reader["AsiAdi"].ToString();
+                        comboBox1.Items.Add(asiAdi);
                     }
 
                     reader.Close();
@@ -141,6 +164,42 @@ namespace temizHCO
                     {
                         MessageBox.Show("Veriler güncellenirken bir hata oluştu: " + ex.Message);
                     }
+                }
+            }
+        }
+        private SqlConnection connection;
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            string selectedAsiAdi = comboBox1.SelectedItem.ToString();
+
+            // Seçilen aşının bilgilerini çekme sorgusu
+            string asiInfoQuery = "SELECT AsiAdi, AsiTarihi, AsiTekrarTarihi, AsiSeriNo FROM Asilar WHERE AsiAdi = @AsiAdi";
+
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                using (SqlCommand command = new SqlCommand(asiInfoQuery, connection))
+                {
+                    command.Parameters.AddWithValue("@AsiAdi", selectedAsiAdi);
+
+                    SqlDataReader asiInfoReader = command.ExecuteReader();
+
+                    if (asiInfoReader.Read())
+                    {
+                        // Asi bilgilerini TextBox'lar ve DateTimePicker'lar içine doldurun
+                        string asiAdi = asiInfoReader["AsiAdi"].ToString();
+                        DateTime asiTarihi = Convert.ToDateTime(asiInfoReader["AsiTarihi"]);
+                        DateTime asiTekrarTarihi = Convert.ToDateTime(asiInfoReader["AsiTekrarTarihi"]);
+                        string asiSeriNo = asiInfoReader["AsiSeriNo"].ToString();
+
+                        textBox1.Text = asiAdi;
+                        dateTimePicker1.Value = asiTarihi;
+                        dateTimePicker2.Value = asiTekrarTarihi;
+                        textBox2.Text = asiSeriNo;
+                    }
+
+                    asiInfoReader.Close();
                 }
             }
         }
