@@ -1,14 +1,15 @@
-﻿using Microsoft.Data.Sqlite;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
 using System.Windows.Forms;
 
 namespace temizHCO
 {
     public partial class Görüntüleme : Form
     {
-        public SqliteConnection connection;
-        private string connectionString = "Data Source=HCO.db;";
+        public SqlConnection connection;
+        private string connectionString = ("server=.; Initial Catalog=HcoDb;Integrated Security=SSPI");
 
         private FlowLayoutPanel flowLayoutPanel;
         private int buttonHeight = 80;
@@ -25,7 +26,7 @@ namespace temizHCO
 
             this.Controls.Add(flowLayoutPanel);
 
-            connection = new SqliteConnection(connectionString);
+            connection = new SqlConnection(connectionString);
 
             try
             {
@@ -41,11 +42,11 @@ namespace temizHCO
         private void VeritabanindanHastaSahipleriniAlVeButtonlariOlustur()
         {
             string query = "SELECT Ad, Soyad FROM HastaSahipleri";
-            SqliteCommand command = new SqliteCommand(query, connection);
+            SqlCommand command = new SqlCommand(query, connection);
 
             try
             {
-                SqliteDataReader reader = command.ExecuteReader();
+                SqlDataReader reader = command.ExecuteReader();
 
                 while (reader.Read())
                 {
@@ -74,7 +75,7 @@ namespace temizHCO
 
                                 if (secilenHayvanID != -1)
                                 {
-                                    MessageBox.Show("Seçilen Hayvan ID: " + secilenHayvanID);
+                                   
                                 }
                                 else
                                 {
@@ -108,55 +109,86 @@ namespace temizHCO
             int sahipID = -1;
             string sahipQuery = "SELECT SahipID FROM HastaSahipleri WHERE Ad = @Ad AND Soyad = @Soyad";
 
-            using (SqliteCommand sahipCommand = new SqliteCommand(sahipQuery, connection))
+            using (SqlCommand sahipCommand = new SqlCommand(sahipQuery, connection))
             {
                 sahipCommand.Parameters.AddWithValue("@Ad", ad);
                 sahipCommand.Parameters.AddWithValue("@Soyad", soyad);
 
                 try
                 {
-                    object sahipIDResult = sahipCommand.ExecuteScalar();
-
-                    if (sahipIDResult != null)
+                    if (connection.State == ConnectionState.Closed)
                     {
-                        sahipID = Convert.ToInt32(sahipIDResult);
+                        connection.Open();
+                    }
+
+                    using (SqlDataReader reader = sahipCommand.ExecuteReader())
+                    {
+                        if (reader.Read()) // Veri bulunursa
+                        {
+                            sahipID = Convert.ToInt32(reader["SahipID"]);
+                        }
                     }
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show("Sahip ID'si alınırken bir hata oluştu: " + ex.Message);
                 }
+                finally
+                {
+                    if (connection.State == ConnectionState.Open)
+                    {
+                        connection.Close();
+                    }
+                }
             }
 
             return sahipID;
         }
+
+
 
         private List<int> GetHayvanlarBySahipID(int sahipID)
         {
             List<int> hayvanIDList = new List<int>();
             string hayvanQuery = "SELECT HayvanID FROM HayvanHastaSahipleri WHERE SahipID = @SahipID";
 
-            using (SqliteCommand hayvanCommand = new SqliteCommand(hayvanQuery, connection))
+            try
             {
-                hayvanCommand.Parameters.AddWithValue("@SahipID", sahipID);
-
-                try
+                if (connection.State != ConnectionState.Open)
                 {
-                    SqliteDataReader reader = hayvanCommand.ExecuteReader();
+                    connection.Open(); // Bağlantıyı açın (eğer kapalı ise)
+                }
 
-                    while (reader.Read())
+                using (SqlCommand hayvanCommand = new SqlCommand(hayvanQuery, connection))
+                {
+                    hayvanCommand.Parameters.AddWithValue("@SahipID", sahipID);
+
+                    using (SqlDataReader reader = hayvanCommand.ExecuteReader())
                     {
-                        hayvanIDList.Add(Convert.ToInt32(reader["HayvanID"]));
+                        while (reader.Read())
+                        {
+                            hayvanIDList.Add(Convert.ToInt32(reader["HayvanID"]));
+                        }
                     }
                 }
-                catch (Exception ex)
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Hayvanlar alınırken bir hata oluştu: " + ex.Message);
+            }
+            finally
+            {
+                if (connection.State == ConnectionState.Open)
                 {
-                    MessageBox.Show("Hayvanlar alınırken bir hata oluştu: " + ex.Message);
+                    connection.Close(); // Bağlantıyı kapatın (eğer açık ise)
                 }
             }
 
             return hayvanIDList;
         }
+
+
+
 
         private int ShowHayvanSecimForm(List<int> hayvanIDList)
         {
@@ -207,64 +239,83 @@ namespace temizHCO
 
         private string GetHayvanAdiByID(int hayvanID)
         {
+
             string hayvanAdi = "";
             string hayvanAdiQuery = "SELECT Ad FROM Hayvanlar WHERE HayvanID = @HayvanID";
 
-            using (SqliteCommand hayvanAdiCommand = new SqliteCommand(hayvanAdiQuery, connection))
+            using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                hayvanAdiCommand.Parameters.AddWithValue("@HayvanID", hayvanID);
-
                 try
                 {
-                    object hayvanAdiResult = hayvanAdiCommand.ExecuteScalar();
+                    connection.Open(); // Bağlantıyı açın
 
-                    if (hayvanAdiResult != null)
+                    using (SqlCommand hayvanAdiCommand = new SqlCommand(hayvanAdiQuery, connection))
                     {
-                        hayvanAdi = hayvanAdiResult.ToString();
+                        hayvanAdiCommand.Parameters.AddWithValue("@HayvanID", hayvanID);
+
+                        object hayvanAdiResult = hayvanAdiCommand.ExecuteScalar();
+
+                        if (hayvanAdiResult != null)
+                        {
+                            hayvanAdi = hayvanAdiResult.ToString();
+                        }
                     }
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show("Hayvan adı alınırken bir hata oluştu: " + ex.Message);
                 }
+                finally
+                {
+                    if (connection.State == ConnectionState.Open)
+                    {
+                        connection.Close(); // Bağlantıyı kapatın (eğer açık ise)
+                    }
+                }
             }
 
             return hayvanAdi;
         }
+
+
 
         private int GetHayvanIDByAdi(string hayvanAdi)
         {
             int hayvanID = -1;
             string hayvanIDQuery = "SELECT HayvanID FROM Hayvanlar WHERE Ad = @Ad";
 
-            using (SqliteCommand hayvanIDCommand = new SqliteCommand(hayvanIDQuery, connection))
+            using (SqlConnection newConnection = new SqlConnection(connectionString))
             {
-                hayvanIDCommand.Parameters.AddWithValue("@Ad", hayvanAdi);
+                newConnection.Open(); // Yeni bir bağlantı açın
 
-                try
+                using (SqlCommand hayvanIDCommand = new SqlCommand(hayvanIDQuery, newConnection))
                 {
-                    object hayvanIDResult = hayvanIDCommand.ExecuteScalar();
+                    hayvanIDCommand.Parameters.AddWithValue("@Ad", hayvanAdi);
 
-                    if (hayvanIDResult != null)
+                    try
                     {
-                        hayvanID = Convert.ToInt32(hayvanIDResult);
-                        HızlıDüzenlemeForm fr = new HızlıDüzenlemeForm();
-                        fr.veri = hayvanID.ToString();
-                        this.Hide();
-                        fr.Show();
+                        object hayvanIDResult = hayvanIDCommand.ExecuteScalar();
 
+                        if (hayvanIDResult != null)
+                        {
+                            hayvanID = Convert.ToInt32(hayvanIDResult);
+                            HızlıDüzenlemeForm fr = new HızlıDüzenlemeForm();
+                            fr.veri = hayvanID.ToString();
+                            this.Hide();
+                            fr.Show();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Hayvan ID'si alınırken bir hata oluştu: " + ex.Message);
                     }
                 }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Hayvan ID'si alınırken bir hata oluştu: " + ex.Message);
-                }
+
+                newConnection.Close(); // Yeni bağlantıyı kapatın
             }
 
             return hayvanID;
         }
-
-        // Diğer olaylar ve metotlar
 
         private void Görüntüleme_Load(object sender, EventArgs e)
         {
@@ -279,9 +330,10 @@ namespace temizHCO
 
         private void toolStripLabel1_Click(object sender, EventArgs e)
         {
-            Arama_Form af =  new Arama_Form();
+            Arama_Form af = new Arama_Form();
+            this.Hide();
             af.Show();
-            
+          
         }
 
         private void Görüntüleme_Load_1(object sender, EventArgs e)

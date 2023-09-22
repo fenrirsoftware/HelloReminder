@@ -80,6 +80,7 @@
             this.radioButton2.TabStop = true;
             this.radioButton2.Text = "TCKN";
             this.radioButton2.UseVisualStyleBackColor = true;
+            this.radioButton2.CheckedChanged += new System.EventHandler(this.radioButton2_CheckedChanged);
             // 
             // radioButton3
             // 
@@ -132,6 +133,7 @@
             this.Name = "Arama_Form";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Arama_Form";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Arama_Form_FormClosing);
             this.Load += new System.EventHandler(this.Arama_Form_Load);
             this.ResumeLayout(false);
             this.PerformLayout();

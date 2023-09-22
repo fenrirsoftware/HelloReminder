@@ -1,59 +1,22 @@
-﻿using Microsoft.Data.Sqlite;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System;
 using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Data.SqlClient;
 using System.Windows.Forms;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
-using static temizHCO.Form1;
 
 namespace temizHCO
 {
     public partial class HastaSahibiForm : Form
     {
+        private string connectionString = ("server=.; Initial Catalog=HcoDb;Integrated Security=SSPI");
         public HastaSahibiForm()
         {
             InitializeComponent();
-            SQLitePCL.Batteries.Init();
-
-
         }
-        private string connectionString = "Data Source=HCO.db;";
+
         private void HastaSahibiForm_Load(object sender, EventArgs e)
         {
-            using (SqliteConnection connection = new SqliteConnection(connectionString))
-            {
-                connection.Open();
-
-
-                string query = "SELECT SahipID, Ad, Soyad, TCKimlik, TelefonNumarasi FROM HastaSahipleri";
-                using (SqliteCommand command = new SqliteCommand(query, connection))
-                {
-                    using (SqliteDataReader reader = command.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            // Verileri DataGridView'e ekleyin
-                            int sahipID = reader.GetInt32(0);
-                            string ad = reader.GetString(1);
-                            string soyad = reader.GetString(2);
-                            string tcKimlik = reader.GetString(3);
-                            string telefon = reader.GetString(4);
-
-                            dataGridView1.Rows.Add(sahipID, ad, soyad, tcKimlik, telefon);
-                        }
-                    }
-                }
-
-
-                connection.Close();
-            }
+            LoadHastaSahipleriData();
         }
-
 
         private void LoadHastaSahipleriData()
         {
@@ -61,14 +24,14 @@ namespace temizHCO
             dataGridView1.Rows.Clear();
 
             // Veritabanından hasta sahibi bilgilerini al
-            using (SqliteConnection connection = new SqliteConnection(connectionString))
+            using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 connection.Open();
 
                 string query = "SELECT SahipID, Ad, Soyad, TCKimlik, TelefonNumarasi FROM HastaSahipleri";
-                using (SqliteCommand command = new SqliteCommand(query, connection))
+                using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    using (SqliteDataReader reader = command.ExecuteReader())
+                    using (SqlDataReader reader = command.ExecuteReader())
                     {
                         while (reader.Read())
                         {
@@ -87,6 +50,7 @@ namespace temizHCO
                 connection.Close();
             }
         }
+
         private void button1_Click(object sender, EventArgs e)
         {
             // Kullanıcının girdiği verileri al
@@ -101,28 +65,26 @@ namespace temizHCO
 
             if (result == DialogResult.Yes)
             {
-                // Veriyi SQLite veritabanına eklemek için SQL sorgusu oluştur
-                using (SqliteConnection connection = new SqliteConnection(connectionString))
+                // Veriyi SQL Server veritabanına eklemek için SQL sorgusu oluştur
+                using (SqlConnection connection = new SqlConnection(connectionString))
                 {
                     connection.Open();
 
                     // Hasta sahibi ekleme işlemi
                     string insertSahipQuery = "INSERT INTO HastaSahipleri (Ad, Soyad, TCKimlik, TelefonNumarasi) VALUES (@Ad, @Soyad, @TCKimlik, @Telefon)";
-                    using (SqliteCommand insertSahipCommand = new SqliteCommand(insertSahipQuery, connection))
+                    using (SqlCommand insertSahipCommand = new SqlCommand(insertSahipQuery, connection))
                     {
                         insertSahipCommand.Parameters.AddWithValue("@Ad", sahipAd);
                         insertSahipCommand.Parameters.AddWithValue("@Soyad", sahipSoyad);
                         insertSahipCommand.Parameters.AddWithValue("@TCKimlik", sahipTCKimlik);
                         insertSahipCommand.Parameters.AddWithValue("@Telefon", sahipTelefon);
                         insertSahipCommand.ExecuteNonQuery();
-                       
                     }
 
                     connection.Close();
                 }
                 LoadHastaSahipleriData();
             }
-
         }
 
         private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
@@ -166,12 +128,12 @@ namespace temizHCO
             if (result == DialogResult.Yes)
             {
                 // Veriyi güncelle
-                using (SqliteConnection connection = new SqliteConnection(connectionString))
+                using (SqlConnection connection = new SqlConnection(connectionString))
                 {
                     connection.Open();
-
+                    
                     string updateQuery = "UPDATE HastaSahipleri SET Ad = @Ad, Soyad = @Soyad, TCKimlik = @TCKimlik, TelefonNumarasi = @Telefon WHERE SahipID = @SahipID";
-                    using (SqliteCommand updateCommand = new SqliteCommand(updateQuery, connection))
+                    using (SqlCommand updateCommand = new SqlCommand(updateQuery, connection))
                     {
                         updateCommand.Parameters.AddWithValue("@SahipID", sahipID);
                         updateCommand.Parameters.AddWithValue("@Ad", yeniAd);
@@ -184,8 +146,6 @@ namespace temizHCO
 
                     connection.Close();
                 }
-
-
 
                 // TextBox'lardaki verileri temizle
                 txtsahipad.Clear();
@@ -216,18 +176,34 @@ namespace temizHCO
 
             if (result == DialogResult.Yes)
             {
-                using (SqliteConnection connection = new SqliteConnection(connectionString))
+                using (SqlConnection connection = new SqlConnection(connectionString))
                 {
                     connection.Open();
+
+                    // İlgili hasta sahibinin tüm hayvan ilişkilerini kaldırma sorgusu
+                    string deleteHayvanSahipleriQuery = "DELETE FROM HayvanHastaSahipleri WHERE SahipID = @SahipID";
+                    using (SqlCommand deleteHayvanSahipleriCommand = new SqlCommand(deleteHayvanSahipleriQuery, connection))
+                    {
+                        deleteHayvanSahipleriCommand.Parameters.AddWithValue("@SahipID", sahipID);
+                        deleteHayvanSahipleriCommand.ExecuteNonQuery();
+                    }
 
                     // Sahip kaydını silme sorgusu
                     string deleteQuery = "DELETE FROM HastaSahipleri WHERE SahipID = @SahipID";
 
-                    using (SqliteCommand deleteCommand = new SqliteCommand(deleteQuery, connection))
+                    using (SqlCommand deleteCommand = new SqlCommand(deleteQuery, connection))
                     {
                         deleteCommand.Parameters.AddWithValue("@SahipID", sahipID);
                         deleteCommand.ExecuteNonQuery();
                     }
+
+
+
+                 
+
+                    connection.Close();
+
+
 
                     connection.Close();
                 }
@@ -237,10 +213,48 @@ namespace temizHCO
             }
         }
 
+
         private void HastaSahibiForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             Form1 fr = new Form1();
             fr.Show();
         }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+            string aramaKelimesi = textBox1.Text.Trim(); // TextBox'tan gelen arama kelimesini al
+
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                // Arama sorgusu
+                string query = "SELECT SahipID, Ad, Soyad, TCKimlik, TelefonNumarasi FROM HastaSahipleri WHERE Ad LIKE @AramaKelimesi OR Soyad LIKE @AramaKelimesi OR TCKimlik LIKE @AramaKelimesi OR TelefonNumarasi LIKE @AramaKelimesi";
+
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@AramaKelimesi", "%" + aramaKelimesi + "%"); // LIKE kullanarak benzer sonuçları al
+                    using (SqlDataReader reader = command.ExecuteReader())
+                    {
+                        dataGridView1.Rows.Clear(); // DataGridView'i temizle
+
+                        while (reader.Read())
+                        {
+                            // Verileri DataGridView'e ekleyin
+                            int sahipID = reader.GetInt32(0);
+                            string ad = reader.GetString(1);
+                            string soyad = reader.GetString(2);
+                            string tcKimlik = reader.GetString(3);
+                            string telefon = reader.GetString(4);
+
+                            dataGridView1.Rows.Add(sahipID, ad, soyad, tcKimlik, telefon);
+                        }
+                    }
+                }
+
+                connection.Close();
+            }
+        }
+
     }
 }

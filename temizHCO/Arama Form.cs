@@ -1,6 +1,7 @@
-﻿using Microsoft.Data.Sqlite;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
 using System.Windows.Forms;
 
 namespace temizHCO
@@ -11,17 +12,16 @@ namespace temizHCO
         {
             InitializeComponent();
             // Veritabanı bağlantısını açın
-            connection = new SqliteConnection(connectionString);
+            connection = new SqlConnection(connectionString);
         }
 
-        public SqliteConnection connection;
-        private string connectionString = "Data Source=HCO.db;"; // Veritabanı bağlantı dizesini buraya ekleyin
+        public SqlConnection connection;
+        private string connectionString = ("server=.; Initial Catalog=HcoDb;Integrated Security=SSPI");
 
         private void Arama_Form_Load(object sender, EventArgs e)
         {
-        }
 
-       
+        }
 
         private void button1_Click(object sender, EventArgs e)
         {
@@ -29,9 +29,6 @@ namespace temizHCO
             {
                 string belirliHayvanAdi = textBox1.Text.Trim();
                 string query = $"SELECT Hayvanlar.HayvanID FROM Hayvanlar WHERE Hayvanlar.Ad LIKE '%{belirliHayvanAdi}%'";
-
-               
-               
 
                 ExecuteQueryAndShowResult(query);
             }
@@ -47,11 +44,11 @@ namespace temizHCO
                 List<int> hayvanIDList = new List<int>();
                 List<string> hayvanAdList = new List<string>();
 
-                using (SqliteConnection sqliteConnection = new SqliteConnection(connectionString))
+                using (SqlConnection sqlConnection = new SqlConnection(connectionString))
                 {
-                    sqliteConnection.Open();
-                    SqliteCommand command = new SqliteCommand(query, sqliteConnection);
-                    SqliteDataReader reader = command.ExecuteReader();
+                    sqlConnection.Open();
+                    SqlCommand command = new SqlCommand(query, sqlConnection);
+                    SqlDataReader reader = command.ExecuteReader();
 
                     while (reader.Read())
                     {
@@ -95,14 +92,7 @@ namespace temizHCO
                         if (comboBox.SelectedItem != null)
                         {
                             secilenHayvanID = hayvanIDList[hayvanAdList.IndexOf(comboBox.SelectedItem.ToString())];
-
-
-                            
-
                             secimForm.Close();
-                         
-
-
                         }
                         else
                         {
@@ -112,8 +102,6 @@ namespace temizHCO
                     secimForm.Controls.Add(button);
 
                     secimForm.ShowDialog();
-
-                  
                 }
                 else if (hayvanIDList.Count == 1)
                 {
@@ -131,8 +119,6 @@ namespace temizHCO
                     fr.veri = secilenHayvanID.ToString();
                     fr.Show();
                 }
-
-              
             }
             else if (radioButton3.Checked)
             {
@@ -158,16 +144,16 @@ namespace temizHCO
                                "LEFT JOIN HayvanAsi ON Hayvanlar.HayvanID = HayvanAsi.HayvanID " +
                                "LEFT JOIN Asilar ON HayvanAsi.AsiTakipID = Asilar.AsiTakipID " +
                                $"WHERE HastaSahipleri.Ad LIKE '%{adsoyad}%' OR HastaSahipleri.Soyad LIKE '%{adsoyad}%' " +
-                               $"OR (HastaSahipleri.Ad || ' ' || HastaSahipleri.Soyad) LIKE '%{adsoyad}%'";
+                               $"OR (HastaSahipleri.Ad + ' ' + HastaSahipleri.Soyad) LIKE '%{adsoyad}%'";
 
                 List<int> hayvanIDList = new List<int>();
                 List<string> hayvanAdList = new List<string>();
 
-                using (SqliteConnection sqliteConnection = new SqliteConnection(connectionString))
+                using (SqlConnection sqlConnection = new SqlConnection(connectionString))
                 {
-                    sqliteConnection.Open();
-                    SqliteCommand command = new SqliteCommand(query, sqliteConnection);
-                    SqliteDataReader reader = command.ExecuteReader();
+                    sqlConnection.Open();
+                    SqlCommand command = new SqlCommand(query, sqlConnection);
+                    SqlDataReader reader = command.ExecuteReader();
 
                     while (reader.Read())
                     {
@@ -180,7 +166,7 @@ namespace temizHCO
 
                     reader.Close();
                 }
-             
+
                 int secilenHayvanID = -1;
                 if (hayvanIDList.Count > 1)
                 {
@@ -212,9 +198,6 @@ namespace temizHCO
                         {
                             secilenHayvanID = hayvanIDList[hayvanAdList.IndexOf(comboBox.SelectedItem.ToString())];
                             secimForm.Close();
-
-                         
-
                         }
                         else
                         {
@@ -228,10 +211,7 @@ namespace temizHCO
                     if (comboBox.SelectedItem != null)
                     {
                         secilenHayvanID = hayvanIDList[hayvanAdList.IndexOf(comboBox.SelectedItem.ToString())];
-                       
                         secimForm.Close();
-
-                       
                     }
                     else
                     {
@@ -264,26 +244,23 @@ namespace temizHCO
 
         private void ExecuteQueryAndShowResult(string query)
         {
-            SqliteCommand command = new SqliteCommand(query, connection);
+            SqlCommand command = new SqlCommand(query, connection);
 
             try
             {
                 connection.Open();
-                SqliteDataReader reader = command.ExecuteReader();
+                SqlDataReader reader = command.ExecuteReader();
 
                 string sonuc = "Hasta Sahibi ve Aşı Bilgileri:\n";
 
                 while (reader.Read())
                 {
-                    string hayvanAdi = reader["hayvanID"].ToString();
+                    string hayvanAdi = reader["HayvanID"].ToString();
                     sonuc += "Hayvan Adı: " + hayvanAdi + "\n";
 
                     HızlıDüzenlemeForm fr = new HızlıDüzenlemeForm();
                     fr.veri = hayvanAdi;
                     fr.Show();
-
-
-
                 }
 
                 reader.Close();
@@ -310,6 +287,18 @@ namespace temizHCO
 
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
+        }
+
+        private void radioButton2_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void Arama_Form_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            this.Hide();
+            Görüntüleme g = new Görüntüleme();
+            g.Show();
         }
     }
 }

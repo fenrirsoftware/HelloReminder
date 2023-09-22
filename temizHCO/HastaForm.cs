@@ -1,19 +1,20 @@
-﻿using Microsoft.Data.Sqlite;
-using System;
+﻿using System;
 using System.Data;
+using System.Data.SqlClient;
+using System.Data.SQLite;
 using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace temizHCO
 {
     public partial class HastaForm : Form
     {
-        private string connectionString = "Data Source=HCO.db;";
+        private string connectionString = ("server=.; Initial Catalog=HcoDb;Integrated Security=SSPI");
         private int hayvanID = -1; // Seçilen hayvanın ID'sini saklamak için kullanılacak
 
         public HastaForm()
         {
             InitializeComponent();
-            SQLitePCL.Batteries.Init();
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -42,14 +43,14 @@ namespace temizHCO
             string sahipSoyad = sahipAdSoyad[1];
 
             // Veritabanına hayvan bilgilerini ekleyin
-            using (SqliteConnection connection = new SqliteConnection(connectionString))
+            using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 connection.Open();
 
                 // Eklenen veya mevcut olan hasta sahibinin ID'sini alın
                 string getSahipIDQuery = "SELECT SahipID FROM HastaSahipleri WHERE Ad = @Ad AND Soyad = @Soyad";
                 int sahipID;
-                using (SqliteCommand getSahipIDCommand = new SqliteCommand(getSahipIDQuery, connection))
+                using (SqlCommand getSahipIDCommand = new SqlCommand(getSahipIDQuery, connection))
                 {
                     getSahipIDCommand.Parameters.AddWithValue("@Ad", sahipAd);
                     getSahipIDCommand.Parameters.AddWithValue("@Soyad", sahipSoyad);
@@ -70,7 +71,7 @@ namespace temizHCO
                 // Hayvanı veritabanına ekleyin
                 string insertHayvanQuery = "INSERT INTO Hayvanlar (Ad, PasaportNumarasi, CipNumarasi, Renk, Irk, Yas, Cinsiyet, Notlar, Tur) " +
                                            "VALUES (@Ad, @PasaportNumarasi, @CipNumarasi, @Renk, @Irk, @Yas, @Cinsiyet, @Notlar, @Tur)";
-                using (SqliteCommand insertHayvanCommand = new SqliteCommand(insertHayvanQuery, connection))
+                using (SqlCommand insertHayvanCommand = new SqlCommand(insertHayvanQuery, connection))
                 {
                     insertHayvanCommand.Parameters.AddWithValue("@Ad", hayvanAd);
                     insertHayvanCommand.Parameters.AddWithValue("@PasaportNumarasi", pasaportNumarasi);
@@ -85,25 +86,28 @@ namespace temizHCO
                     insertHayvanCommand.ExecuteNonQuery();
                 }
 
-                // Hayvanı ve hastasahibini ilişkilendirin
-                string getLastInsertedHayvanIDQuery = "SELECT last_insert_rowid()";
+                // HayvanID'yi al
+                string getLastHayvanIDQuery = "SELECT TOP 1 HayvanID FROM Hayvanlar ORDER BY HayvanID DESC";
                 int hayvanID;
-                using (SqliteCommand getLastInsertedHayvanIDCommand = new SqliteCommand(getLastInsertedHayvanIDQuery, connection))
+                using (SqlCommand getLastHayvanIDCommand = new SqlCommand(getLastHayvanIDQuery, connection))
                 {
-                    hayvanID = Convert.ToInt32(getLastInsertedHayvanIDCommand.ExecuteScalar());
+                    hayvanID = Convert.ToInt32(getLastHayvanIDCommand.ExecuteScalar());
                 }
 
+                // SahipID'yi aldığınızdan emin olun
+               
+
+                // Bağlama işlemini gerçekleştirin
                 string insertHayvanSahipQuery = "INSERT INTO HayvanHastaSahipleri (HayvanID, SahipID) VALUES (@HayvanID, @SahipID)";
-                using (SqliteCommand insertHayvanSahipCommand = new SqliteCommand(insertHayvanSahipQuery, connection))
+                using (SqlCommand insertHayvanSahipCommand = new SqlCommand(insertHayvanSahipQuery, connection))
                 {
                     insertHayvanSahipCommand.Parameters.AddWithValue("@HayvanID", hayvanID);
                     insertHayvanSahipCommand.Parameters.AddWithValue("@SahipID", sahipID);
                     insertHayvanSahipCommand.ExecuteNonQuery();
                 }
 
-                connection.Close();
 
-              
+                connection.Close();
             }
 
             LoadVeriler();
@@ -111,7 +115,12 @@ namespace temizHCO
             // Verileri temizle
             TemizleForm();
         }
-        private void TemizleForm()
+
+        // Diğer metotlarınızı buraya ekleyin
+    
+
+
+private void TemizleForm()
         {
             // Tüm girdi kutularını temizle
             txtad.Clear();
@@ -132,34 +141,34 @@ namespace temizHCO
             dataGridView1.Rows.Clear();
 
             // Veritabanından hayvan ve sahip bilgilerini al
-            using (SqliteConnection connection = new SqliteConnection(connectionString))
+            using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 connection.Open();
 
                 string query = @"
-                SELECT
-                    Hayvanlar.HayvanID,
-                    Hayvanlar.Ad AS HayvanAdi,
-                    Hayvanlar.PasaportNumarasi,
-                    Hayvanlar.CipNumarasi,
-                    Hayvanlar.Renk,
-                    Hayvanlar.Irk,
-                    Hayvanlar.Yas,
-                    Hayvanlar.Cinsiyet,
-                    Hayvanlar.Notlar,
-                    Hayvanlar.Tur,
-                    HastaSahipleri.Ad AS SahipAdi,
-                    HastaSahipleri.Soyad AS SahipSoyadi,
-                    HastaSahipleri.TCKimlik AS SahipTCKimlik
-                FROM
-                    Hayvanlar
-                LEFT JOIN
-                    HayvanHastaSahipleri ON Hayvanlar.HayvanID = HayvanHastaSahipleri.HayvanID
-                LEFT JOIN
-                    HastaSahipleri ON HayvanHastaSahipleri.SahipID = HastaSahipleri.SahipID;";
-                using (SqliteCommand command = new SqliteCommand(query, connection))
+        SELECT
+            Hayvanlar.HayvanID,
+            Hayvanlar.Ad AS HayvanAdi,
+            Hayvanlar.PasaportNumarasi,
+            Hayvanlar.CipNumarasi,
+            Hayvanlar.Renk,
+            Hayvanlar.Irk,
+            Hayvanlar.Yas,
+            Hayvanlar.Cinsiyet,
+            Hayvanlar.Notlar,
+            Hayvanlar.Tur,
+            HastaSahipleri.Ad AS SahipAdi,
+            HastaSahipleri.Soyad AS SahipSoyadi,
+            HastaSahipleri.TCKimlik AS SahipTCKimlik
+        FROM
+            Hayvanlar
+        LEFT JOIN
+            HayvanHastaSahipleri ON Hayvanlar.HayvanID = HayvanHastaSahipleri.HayvanID
+        LEFT JOIN
+            HastaSahipleri ON HayvanHastaSahipleri.SahipID = HastaSahipleri.SahipID;";
+                using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    using (SqliteDataReader reader = command.ExecuteReader())
+                    using (SqlDataReader reader = command.ExecuteReader())
                     {
                         while (reader.Read())
                         {
@@ -171,7 +180,7 @@ namespace temizHCO
                             string cipNumarasi = reader.IsDBNull(reader.GetOrdinal("CipNumarasi")) ? string.Empty : reader.GetString(reader.GetOrdinal("CipNumarasi"));
                             string renk = reader.IsDBNull(reader.GetOrdinal("Renk")) ? string.Empty : reader.GetString(reader.GetOrdinal("Renk"));
                             string irk = reader.IsDBNull(reader.GetOrdinal("Irk")) ? string.Empty : reader.GetString(reader.GetOrdinal("Irk"));
-                            int yas = reader.IsDBNull(reader.GetOrdinal("Yas")) ? -1 : reader.GetInt32(reader.GetOrdinal("Yas"));
+                            string yas = reader.IsDBNull(reader.GetOrdinal("Yas")) ? string.Empty : reader.GetString(reader.GetOrdinal("Yas"));
                             string cinsiyet = reader.IsDBNull(reader.GetOrdinal("Cinsiyet")) ? string.Empty : reader.GetString(reader.GetOrdinal("Cinsiyet"));
                             string tur = reader.IsDBNull(reader.GetOrdinal("Tur")) ? string.Empty : reader.GetString(reader.GetOrdinal("Tur"));
                             string notlar = reader.IsDBNull(reader.GetOrdinal("Notlar")) ? string.Empty : reader.GetString(reader.GetOrdinal("Notlar"));
@@ -188,19 +197,20 @@ namespace temizHCO
             }
         }
 
+
         private void HastaForm_Load(object sender, EventArgs e)
         {
             LoadVeriler();
 
-            using (SqliteConnection connection = new SqliteConnection(connectionString))
+            using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 connection.Open();
 
                 string query = "SELECT Ad, Soyad FROM HastaSahipleri";
 
-                using (SqliteCommand command = new SqliteCommand(query, connection))
+                using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    using (SqliteDataReader reader = command.ExecuteReader())
+                    using (SqlDataReader reader = command.ExecuteReader())
                     {
                         while (reader.Read())
                         {
@@ -219,6 +229,7 @@ namespace temizHCO
             }
         }
 
+
         private void button2_Click(object sender, EventArgs e)
         {
             // Kullanıcının girdiği verileri al
@@ -228,7 +239,7 @@ namespace temizHCO
             string cipNumarasi = txtcip.Text;
             string renk = txtrenk.Text;
             string irk = textırk.Text;
-            int yas = Convert.ToInt32(txtyas.Text);
+            string yas = txtyas.Text;
             string cinsiyet = txtcins.Text;
             string notlar = txtnot.Text;
             string tur = txtür.Text;
@@ -245,14 +256,13 @@ namespace temizHCO
 
             if (result == DialogResult.Yes)
             {
-                // Veriyi SQLite veritabanında güncelleme için SQL sorgularını kullan
-                using (SqliteConnection connection = new SqliteConnection(connectionString))
+                using (SqlConnection connection = new SqlConnection(connectionString))
                 {
                     connection.Open();
 
                     // Hayvanı güncelleme işlemi
                     string updateHayvanQuery = "UPDATE Hayvanlar SET Ad = @Ad, PasaportNumarasi = @PasaportNumarasi, CipNumarasi = @CipNumarasi, Renk = @Renk, Irk = @Irk, Yas = @Yas, Cinsiyet = @Cinsiyet, Notlar = @Notlar, Tur = @Tur WHERE HayvanID = @HayvanID";
-                    using (SqliteCommand updateHayvanCommand = new SqliteCommand(updateHayvanQuery, connection))
+                    using (SqlCommand updateHayvanCommand = new SqlCommand(updateHayvanQuery, connection))
                     {
                         updateHayvanCommand.Parameters.AddWithValue("@HayvanID", hayvanID);
                         updateHayvanCommand.Parameters.AddWithValue("@Ad", hayvanAd);
@@ -268,9 +278,9 @@ namespace temizHCO
                         updateHayvanCommand.ExecuteNonQuery();
                     }
 
-                    // Hastasahibi bağlama işlemi
+                    // İlgili hayvanın hastasahibi ilişkisini güncelleme işlemi
                     string updateHayvanSahipQuery = "UPDATE HayvanHastaSahipleri SET SahipID = (SELECT SahipID FROM HastaSahipleri WHERE Ad = @SahipAd AND Soyad = @SahipSoyad) WHERE HayvanID = @HayvanID";
-                    using (SqliteCommand updateHayvanSahipCommand = new SqliteCommand(updateHayvanSahipQuery, connection))
+                    using (SqlCommand updateHayvanSahipCommand = new SqlCommand(updateHayvanSahipQuery, connection))
                     {
                         updateHayvanSahipCommand.Parameters.AddWithValue("@HayvanID", hayvanID);
                         updateHayvanSahipCommand.Parameters.AddWithValue("@SahipAd", sahipAd);
@@ -287,6 +297,8 @@ namespace temizHCO
                 LoadVeriler(); // Yeniden verileri yükle
             }
         }
+
+
 
         private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
         {
@@ -331,13 +343,21 @@ namespace temizHCO
 
                 if (result == DialogResult.Yes)
                 {
-                    // Hayvanı veritabanından silme işlemi
-                    using (SqliteConnection connection = new SqliteConnection(connectionString))
+                    using (SqlConnection connection = new SqlConnection(connectionString))
                     {
                         connection.Open();
 
+                        // İlk olarak bağlı tabloları silelim
+                        string deleteHayvanAsiQuery = "DELETE FROM HayvanAsi WHERE HayvanID = @HayvanID";
+                        using (SqlCommand deleteHayvanAsiCommand = new SqlCommand(deleteHayvanAsiQuery, connection))
+                        {
+                            deleteHayvanAsiCommand.Parameters.AddWithValue("@HayvanID", hayvanID);
+                            deleteHayvanAsiCommand.ExecuteNonQuery();
+                        }
+
+                        // Ardından ana tabloyu silelim
                         string deleteHayvanQuery = "DELETE FROM Hayvanlar WHERE HayvanID = @HayvanID";
-                        using (SqliteCommand deleteHayvanCommand = new SqliteCommand(deleteHayvanQuery, connection))
+                        using (SqlCommand deleteHayvanCommand = new SqlCommand(deleteHayvanQuery, connection))
                         {
                             deleteHayvanCommand.Parameters.AddWithValue("@HayvanID", hayvanID);
                             deleteHayvanCommand.ExecuteNonQuery();
@@ -357,15 +377,142 @@ namespace temizHCO
             }
         }
 
-        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
-        {
-
-        }
 
         private void HastaForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             Form1 fr = new Form1();
             fr.Show();
         }
+
+        private void groupBox1_Enter(object sender, EventArgs e)
+        {
+
+        }
+
+        private void comboBox1_TextUpdate(object sender, EventArgs e)
+        {
+           
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            string searchText = comboBox1.Text;
+
+            // SQL sorgusu burada oluşturulmalı ve veritabanından verileri almalısınız
+            // Örneğin, "searchText" değişkenini kullanarak LIKE anahtar kelimesi ile sorgu yapabilirsiniz
+
+            // SqlConnection ve SqlCommand kullanarak sorguyu çalıştırın
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                string query = "SELECT Ad, Soyad FROM HastaSahipleri WHERE Ad LIKE @SearchText + '%'";
+                using (SqlCommand command = new SqlCommand(query, connection))  
+                {
+                    command.Parameters.AddWithValue("@SearchText", searchText);
+
+                    using (SqlDataReader reader = command.ExecuteReader())
+                    {
+                        comboBox1.Items.Clear(); // ComboBox'ı temizle
+
+                        while (reader.Read())
+                        {
+                            string ad = reader.GetString(0);
+                            string soyad = reader.GetString(1);
+                            string sahipAdSoyad = $"{ad} {soyad}";
+
+                            comboBox1.Items.Add(sahipAdSoyad); // Sonuçları ComboBox'a ekleyin
+                        }
+                    }
+                }
+
+                connection.Close();
+            }
+        }
+
+        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+
+        }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+            string searchText = textBox1.Text.Trim(); // TextBox'tan metni alın
+
+            // SqlConnection ve SqlCommand kullanarak sorguyu çalıştırın
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                string query = @"
+            SELECT
+                Hayvanlar.HayvanID,
+                Hayvanlar.Ad AS HayvanAdi,
+                Hayvanlar.PasaportNumarasi,
+                Hayvanlar.CipNumarasi,
+                Hayvanlar.Renk,
+                Hayvanlar.Irk,
+                Hayvanlar.Yas,
+                Hayvanlar.Cinsiyet,
+                Hayvanlar.Notlar,
+                Hayvanlar.Tur,
+                HastaSahipleri.Ad AS SahipAdi,
+                HastaSahipleri.Soyad AS SahipSoyadi,
+                HastaSahipleri.TCKimlik AS SahipTCKimlik
+            FROM
+                Hayvanlar
+            LEFT JOIN
+                HayvanHastaSahipleri ON Hayvanlar.HayvanID = HayvanHastaSahipleri.HayvanID
+            LEFT JOIN
+                HastaSahipleri ON HayvanHastaSahipleri.SahipID = HastaSahipleri.SahipID
+            WHERE
+                Hayvanlar.Ad LIKE @SearchText + '%' OR
+                Hayvanlar.PasaportNumarasi LIKE @SearchText + '%' OR
+                Hayvanlar.CipNumarasi LIKE @SearchText + '%' OR
+                Hayvanlar.Renk LIKE @SearchText + '%' OR
+                Hayvanlar.Irk LIKE @SearchText + '%' OR
+                Hayvanlar.Yas LIKE @SearchText + '%' OR
+                Hayvanlar.Cinsiyet LIKE @SearchText + '%' OR
+                Hayvanlar.Notlar LIKE @SearchText + '%' OR
+                Hayvanlar.Tur LIKE @SearchText + '%' OR
+                HastaSahipleri.Ad LIKE @SearchText + '%' OR
+                HastaSahipleri.Soyad LIKE @SearchText + '%' OR
+                HastaSahipleri.TCKimlik LIKE @SearchText + '%'";
+
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@SearchText", searchText);
+
+                    using (SqlDataReader reader = command.ExecuteReader())
+                    {
+                        dataGridView1.Rows.Clear(); // DataGridView'i temizle
+
+                        while (reader.Read())
+                        {
+                            int hayvanID = reader.GetInt32(reader.GetOrdinal("HayvanID"));
+                            string hayvanAdi = reader.GetString(reader.GetOrdinal("HayvanAdi"));
+                            string pasaportNumarasi = reader.GetString(reader.GetOrdinal("PasaportNumarasi"));
+                            string cipNumarasi = reader.GetString(reader.GetOrdinal("CipNumarasi"));
+                            string renk = reader.GetString(reader.GetOrdinal("Renk"));
+                            string irk = reader.GetString(reader.GetOrdinal("Irk"));
+                            int yas = reader.GetInt32(reader.GetOrdinal("Yas"));
+                            string cinsiyet = reader.GetString(reader.GetOrdinal("Cinsiyet"));
+                            string notlar = reader.GetString(reader.GetOrdinal("Notlar"));
+                            string tur = reader.GetString(reader.GetOrdinal("Tur"));
+                            string sahipAdi = reader.GetString(reader.GetOrdinal("SahipAdi"));
+                            string sahipSoyadi = reader.GetString(reader.GetOrdinal("SahipSoyadi"));
+                            string sahipTCKimlik = reader.GetString(reader.GetOrdinal("SahipTCKimlik"));
+
+                            // Sonuçları DataGridView'e ekleyin
+                            dataGridView1.Rows.Add(hayvanID, hayvanAdi, pasaportNumarasi, cipNumarasi, renk, irk, yas, cinsiyet, notlar, tur, sahipAdi, sahipSoyadi, sahipTCKimlik);
+                        }
+                    }
+                }
+
+                connection.Close();
+            }
+        }
+
+
     }
 }
