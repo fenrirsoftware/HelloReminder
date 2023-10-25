@@ -25,7 +25,7 @@ namespace temizHCO
             string cipNumarasi = txtcip.Text;
             string renk = txtrenk.Text;
             string irk = textırk.Text;
-            int yas = Convert.ToInt32(txtyas.Text);
+            string yas = txtyas.Text;
             string cinsiyet = txtcins.Text;
             string notlar = txtnot.Text;
             string tur = txtür.Text;

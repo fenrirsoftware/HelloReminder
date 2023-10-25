@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Drawing;
+using System.Net.Mail;
+using System.Net;
 using System.Windows.Forms;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -24,7 +26,8 @@ namespace temizHCO
             InitializeComponent();
             InitializeDataGridView();
             PopulateDataGridView();
-            SendReminderMessages();
+
+            SendReminderEmails();
         }
 
         private void InitializeDataGridView()
@@ -115,61 +118,7 @@ namespace temizHCO
             dataGridView1.DataSource = dataTable;
         }
 
-        private async void SendReminderMessages()
-        {
-            DataTable dataTable = (DataTable)dataGridView1.DataSource;
-            List<string> messages = PrepareMessages(dataTable);
-
-            try
-            {
-                var botClient = new TelegramBotClient(botApiToken);
-
-                foreach (var message in messages)
-                {
-                    await botClient.SendTextMessageAsync(chatId, message, parseMode: ParseMode.Html);
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Mesaj gönderme hatası: {ex.Message}");
-            }
-        }
-
-        private List<string> PrepareMessages(DataTable dataTable)
-        {
-            List<string> messages = new List<string>();
-
-            foreach (DataRow row in dataTable.Rows)
-            {
-                string phoneNumber = row["SahipTelefon"].ToString();
-
-                var inlineKeyboard = new InlineKeyboardMarkup(new[]
-                {
-                    new []
-                    {
-                        InlineKeyboardButton.WithCallbackData("Aramayı Başlat", $"tel:{phoneNumber}")
-                    }
-                });
-
-                string message = $"<b>{DateTime.Now.ToString("D")} Asi Bilgileri:</b>\n" +
-                    $"<i>Asi Adı:</i> {row["AsiAdi"]}\n" +
-                    $"<i>Asi Tarihi:</i> {((DateTime)row["AsiTarihi"]).ToShortDateString()}\n" +
-                    $"<i>Asi Tekrar Tarihi:</i> {((DateTime)row["AsiTekrarTarihi"]).ToShortDateString()}\n" +
-                    $"<i>Pasaport Numarası:</i> {row["PasaportNumarasi"]}\n" +
-                    $"<i>Cip Numarası:</i> {row["CipNumarasi"]}\n" +
-                    $"<i>Hayvan Adı:</i> {row["HayvanAdi"]}\n" +
-                    $"<i>Sahip Adı:</i> {row["SahipAdi"]} {row["SahipSoyadi"]}\n" +
-                    $"<i>Sahip Telefon:</i> <a href='tel:{phoneNumber}'>{phoneNumber}</a>\n" +
-                    $"<i>Sahip TCKimlik:</i> {row["SahipTCKimlik"]}\n" +
-                    "\n------------------------\n" +
-                    $"<b>Kalan Gün Sayısı:</b> {((DateTime)row["AsiTekrarTarihi"] - DateTime.Now).Days} GÜN\n" +
-                    "\n------------------------\n";
-
-                messages.Add(message);
-            }
-
-            return messages;
-        }
+        
         private void SetDataGridViewRowColors()
         {
             foreach (DataGridViewRow row in dataGridView1.Rows)
@@ -217,9 +166,55 @@ namespace temizHCO
             }
         }
 
-   
 
 
+        private void SendReminderEmails()
+        {
+            DataTable dataTable = (DataTable)dataGridView1.DataSource;
+
+            foreach (DataRow row in dataTable.Rows)
+            {
+                string recipientEmail = row["SahipEmail"].ToString(); // Alıcı e-posta adresi
+                string subject = "Hatırlatma Mesajı: " + row["AsiAdi"].ToString(); // E-posta konusu
+                string message = "Merhaba,\n\n" +
+                                 "Unutmayın, " + row["AsiAdi"].ToString() + " aşısı için " +
+                                 "son tarih " + ((DateTime)row["AsiTarihi"]).ToShortDateString() + ". " +
+                                 "Lütfen hatırlatmayı göz önünde bulundurun.\n\n" +
+                                 "Saygılarımla,\n" +
+                                 "Sizin Veteriner Hekiminiz";
+
+                // E-posta gönderme işlemi
+                SendEmail(recipientEmail, subject, message);
+            }
+        }
+
+        private void SendEmail(string recipient, string subject, string message)
+        {
+            using (SmtpClient smtpClient = new SmtpClient("mail.fenrirsoftware.com"))
+            {
+                smtpClient.Port = 587; // E-posta sunucu portu (SSL kullanıyorsanız 465 veya 587 gibi olabilir)
+                smtpClient.Credentials = new NetworkCredential("info@fenrirsoftware.com", "TheRedBaron37"); // Gönderen e-posta hesap bilgileri
+                smtpClient.EnableSsl = true; // SSL kullanıyorsanız true, kullanmıyorsanız false
+
+                using (MailMessage mail = new MailMessage())
+                {
+                    mail.From = new MailAddress("ozhan-yildirim@hotmail.com"); // Gönderen e-posta adresi
+                    mail.To.Add(recipient); // Alıcı e-posta adresi
+                    mail.Subject = subject; // E-posta konusu
+                    mail.Body = message; // E-posta mesajı
+
+                    try
+                    {
+                        smtpClient.Send(mail);
+                        Console.WriteLine("E-posta gönderildi: " + recipient);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("E-posta gönderme hatası: " + ex.Message);
+                    }
+                }
+            }
+        }
         private void Reminder_Load(object sender, EventArgs e)
         {
             // Load event handler kodu buraya gelecek

@@ -50,6 +50,8 @@ namespace temizHCO
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            acilis fo = new acilis();
+            fo.Close();
             int hastaSahibiSayisi = GetHastaSahibiSayisi();
             int hayvanSayisi = GetHayvanSayisi();
             int asiSayisi = GetAsiSayisi();
@@ -155,7 +157,7 @@ namespace temizHCO
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            Application.Exit();
+           
         }
 
       
